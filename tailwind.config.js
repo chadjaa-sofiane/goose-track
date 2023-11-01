@@ -14,6 +14,8 @@ export default {
                 },
                 bg: 'hsl(var(--color-bg) / <alpha-value>)',
                 text: 'hsl(var(--color-text) / <alpha-value>)',
+                error: 'hsl(var(--color-error) / <alpha-value>)',
+                correct: 'hsl(var(--color-correct) / <alpha-value>)',
             },
             fontFamily: {
                 Inter: ['Inter', 'sans-serif'],
