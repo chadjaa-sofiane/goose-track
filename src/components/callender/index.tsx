@@ -18,7 +18,7 @@ const Callender = () => {
     }
 
     return (
-        <div className="w-[23.3125em] p-4 bg-accents-1 rounded-lg">
+        <div className="overflow-hidden w-[20.4375em] sm:w-[23.3125em] p-4 bg-accents-1 rounded-lg flex flex-col items-center select-none">
             <CallenderHeader
                 month={month}
                 year={year}
@@ -27,10 +27,16 @@ const Callender = () => {
             />
             <div className="grid grid-cols-7 ">
                 {WEEK_DAYS.map((day, index) => (
-                    <CallenderCell className="font-bold" key={index}>
+                    <CallenderCell
+                        className="font-bold text-sm sm:text-lg"
+                        key={index}
+                    >
                         {day}
                     </CallenderCell>
                 ))}
+            </div>
+            <div className="bg-white bg-opacity-20 w-[110%] sm:w-full h-[1px]" />
+            <div className="grid grid-cols-7">
                 {getDaysOfMonth(month, year).map((day, index) =>
                     day ? (
                         <DayCell
@@ -61,22 +67,19 @@ const CallenderHeader = ({
     setMonth,
     setYear,
 }: CallenderHeaderProps) => {
-    console.log(month, year)
-
     const changeMonth = (increment: number) => {
         const date = dayjs().month(month).year(year).add(increment, 'month')
         setMonth(date.month())
         setYear(date.year())
     }
     return (
-        <div className="flex justify-between items-center">
+        <div className="w-full flex justify-between items-center">
             <LeftChevron
                 onClick={() => changeMonth(-1)}
                 className="cursor-pointer"
             />
-            <span className="font-bold text-2xl">
-                {' '}
-                {dayjs().month(month).format('MMMM')} {year}{' '}
+            <span className="font-bold text-xl sm:text-2xl">
+                {dayjs().month(month).format('MMMM')} {year}
             </span>
             <RightChevron
                 onClick={() => changeMonth(1)}
@@ -102,8 +105,7 @@ const CallenderCell = ({
             onClick={onClick}
             className={cn('w-12 h-12 grid place-items-center', className)}
         >
-            {' '}
-            {children}{' '}
+            {children}
         </div>
     )
 }
@@ -121,7 +123,7 @@ const DayCell = ({ day, selectedDay, handleSelectDay }: DayCellProps) => {
     return (
         <CallenderCell
             onClick={() => handleSelectDay(day)}
-            className={cn('rounded-full', {
+            className={cn('rounded-full text-sm sm:text-lg ', {
                 'bg-white bg-opacity-20': isToday && !isSelected,
                 'bg-white text-accents-1': isSelected,
                 'hover:bg-white hover:bg-opacity-10 cursor-pointer':
