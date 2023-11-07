@@ -1,5 +1,9 @@
 import { cn } from '@/lib/utils'
-import { ComponentPropsWithoutRef } from 'react'
+import React, { ComponentPropsWithoutRef } from 'react'
+import DoneIcon from '@/assets/Done.svg?react'
+import WarningIcon from '@/assets/warning.svg?react'
+
+type Status = 'error' | 'done'
 
 interface InputFieldProps extends ComponentPropsWithoutRef<'input'> {
     type?: 'string' | 'email' | 'password'
@@ -8,7 +12,12 @@ interface InputFieldProps extends ComponentPropsWithoutRef<'input'> {
     value: string
     placeHolder?: string
     message?: string | null
-    status?: 'error' | 'correct' | 'normal'
+    status?: Status
+}
+
+const icon: Record<Status, React.ReactNode> = {
+    done: <DoneIcon />,
+    error: <WarningIcon />,
 }
 
 const InputField = ({
@@ -18,41 +27,46 @@ const InputField = ({
     placeHolder = '',
     value,
     message,
-    status = 'normal',
+    status,
     ...rest
 }: InputFieldProps) => {
     const error = status == 'error'
-    const correct = status == 'correct'
+    const done = status == 'done'
     return (
         <div className="flex flex-col gap-y-2">
             <label
                 className={cn('text-text text-opacity-50 text-sm', {
                     'text-error': !!error,
-                    'text-correct': correct,
+                    'text-done': done,
                 })}
             >
                 {' '}
                 {label}{' '}
             </label>
-            <input
-                {...rest}
-                type={type}
-                name={name}
-                value={value}
-                placeholder={placeHolder}
+            <div
                 className={cn(
-                    'bg-transparent outline-none border border-text border-opacity-50 py-3.5 px-[1.125em] rounded-md font-medium',
+                    'bg-transparent outline-none border border-text border-opacity-50 py-3.5 px-[1.125em] rounded-md font-medium flex items-center',
                     {
                         'border-error': error,
-                        'border-correct': correct,
+                        'border-done': done,
                     }
                 )}
-            />
+            >
+                <input
+                    {...rest}
+                    type={type}
+                    name={name}
+                    value={value}
+                    placeholder={placeHolder}
+                    className="bg-transparent outline-none"
+                />
+                <div>{status && icon[status]}</div>
+            </div>
             {!!message && (
                 <span
                     className={cn('text-xs px-[1.125em]', {
                         'text-error': error,
-                        'text-correct': correct,
+                        'text-done': done,
                     })}
                 >
                     {' '}
