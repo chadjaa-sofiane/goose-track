@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import Button from '@/components/button'
-import RadioSelector from '@/components/radioSelector'
-import InputField from '@/components/inputField'
+import { Button } from '@/components/button'
+import { RadioSelector } from '@/components/radioSelector'
+import { InputField } from '@/components/inputField'
 import ExitIcon from '@/assets/exit.svg?react'
-import Callender from './components/callender'
-import ProfileImageUploader from './components/profileImageUploader'
+import { Callender } from './components/callender'
+import { ProfileImageUploader } from './components/profileImageUploader'
 
 const OPTIONS = ['Month', 'Day']
 
