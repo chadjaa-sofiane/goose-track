@@ -1,4 +1,4 @@
-# goose-track
+# server
 
 To install dependencies:
 

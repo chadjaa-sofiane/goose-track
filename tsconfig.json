@@ -1,31 +1,23 @@
 {
     "compilerOptions": {
-        "target": "ES2020",
-        "useDefineForClassFields": true,
-        "lib": ["ES2020", "DOM", "DOM.Iterable"],
-        "module": "ESNext",
-        "skipLibCheck": true,
-
-        /* Bundler mode */
+        "lib": ["ESNext"],
+        "module": "esnext",
+        "target": "esnext",
         "moduleResolution": "bundler",
+        "moduleDetection": "force",
         "allowImportingTsExtensions": true,
-        "resolveJsonModule": true,
-        "isolatedModules": true,
         "noEmit": true,
-        "jsx": "react-jsx",
-
-        /* Linting */
+        "composite": true,
         "strict": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noFallthroughCasesInSwitch": true,
-        "baseUrl": ".",
-        "esModuleInterop": true,
+        "downlevelIteration": true,
+        "skipLibCheck": true,
+        "jsx": "react-jsx",
         "allowSyntheticDefaultImports": true,
-        "paths": {
-            "@/*": ["src/*"]
-        }
+        "forceConsistentCasingInFileNames": true,
+        "allowJs": true,
+        "types": [
+            "bun-types" // add Bun global
+        ]
     },
-    "include": ["src"],
-    "references": [{ "path": "./tsconfig.node.json" }]
+    "exclude": ["node_modules"]
 }
