@@ -28,12 +28,13 @@ const InputField = ({
     value,
     message,
     status,
+    className,
     ...rest
 }: InputFieldProps) => {
     const error = status == 'error'
     const done = status == 'done'
     return (
-        <div className="flex flex-col gap-y-2">
+        <div className={cn("flex flex-col gap-y-2", className)}>
             <label
                 className={cn('text-text text-opacity-50 text-sm', {
                     'text-error': !!error,

@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils'
 import { ComponentPropsWithoutRef, ReactElement } from 'react'
 
 interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
@@ -8,11 +9,11 @@ interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
     }
 }
 
-const Button = ({ children, icons, ...rest }: ButtonProps) => {
+const Button = ({ children, icons, className, ...rest }: ButtonProps) => {
     return (
         <button
             {...rest}
-            className="px-6 py-4 bg-accents-1 text-white rounded-2xl font-bold hover:bg-accents-2 flex items-center gap-x-3"
+            className={cn("px-6 py-4 bg-accents-1 text-white rounded-2xl font-bold hover:bg-accents-2 flex items-center gap-x-3", className)}
         >
             {icons?.start && icons.start}
             <span> {children} </span>
