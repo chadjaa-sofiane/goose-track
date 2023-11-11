@@ -1,13 +1,13 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import Home from "./home"
-import ErrorPage from "./errorPage"
+import NotFound from "./notFound"
 
 
 const router = createBrowserRouter([
     {
         path: "/",
         element: <Home />,
-        errorElement: <ErrorPage />
+        errorElement: <NotFound />
     },
     {
         path: "/auth",
