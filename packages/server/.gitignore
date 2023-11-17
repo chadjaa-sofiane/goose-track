@@ -175,4 +175,7 @@ dist
 .DS_Store
 
 # scripts folder 
+scripts/
+
+# .pem files
 *.pem
