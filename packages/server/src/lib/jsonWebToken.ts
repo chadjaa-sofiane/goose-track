@@ -32,7 +32,10 @@ export const generateJwtToken = (user: {
 
     // Generate the JWT token
     try {
-        const token = jwt.sign(payload, config.privateJwtKey, { expiresIn })
+        const token = jwt.sign(payload, config.privateJwtKey, {
+            expiresIn,
+            algorithm: 'RS256',
+        })
         return token
     } catch (error) {
         console.error(
@@ -47,7 +50,9 @@ export const generateJwtToken = (user: {
 export const verifyJwtToken = (token: string | null): Payload | null => {
     if (!token) return null
     try {
-        const payload = jwt.verify(token, config.publicJwtKey)
+        const payload = jwt.verify(token, config.publicJwtKey, {
+            algorithms: ['RS256'],
+        })
         return payload as unknown as Payload
     } catch (error) {
         console.error(
