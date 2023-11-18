@@ -10,13 +10,14 @@ const createMongoose = () => {
         connect: async () => {
             try {
                 await mongoose.connect(uri, options)
+
                 console.log(
                     chalk.greenBright(`
-                        connected to the database succesfuly! 
-                        database name: ${chalk.white(
-                            mongoose.connection.db.databaseName
-                        )}
-                            `)
+        connected to the database succesfuly! 
+        database name: ${chalk.white(
+        mongoose.connection.db.databaseName
+                            )}
+                    `)
                 )
             } catch (error) {
                 console.error(error)
@@ -26,8 +27,8 @@ const createMongoose = () => {
             try {
                 await mongoose.disconnect()
                 console.log(
-                    chalk.redBright(`
-                    disconnected from the database succesfuly! 
+                    chalk.blueBright(`
+        disconnected from the database succesfuly! 
                 `)
                 )
             } catch (error) {

@@ -1,4 +1,5 @@
 interface Config {
+    env: string
     port: number | string
     hostname: string
     publicJwtKey: string
@@ -16,35 +17,34 @@ const commonConfigs = {
     port: process.env.PORT || 3000,
     privateJwtKey,
     publicJwtKey,
-    database: {
-        url: process.env.MONGODB_URI || '',
-        db_name: 'production',
-    },
 }
 
 const developmentConfigs = {
     ...commonConfigs,
+    env: 'development',
     hostname: 'localhost',
     database: {
-        ...commonConfigs.database,
-        db_name: 'production',
+        url: process.env.MONGODB_DEVELOPEMENT_URI || '',
+        db_name: 'development',
     },
 }
 
 const productionConfigs = {
     ...commonConfigs,
+    env: 'production',
     hostname: process.env.HOSTNAME || '',
     database: {
-        ...commonConfigs.database,
+        url: process.env.MONGODB_PRODUCTION_URI || '',
         db_name: 'production',
     },
 }
 
 const testConfigs = {
     ...commonConfigs,
+    env: 'test',
     hostname: process.env.HOSTNAME || '',
     database: {
-        ...commonConfigs.database,
+        url: process.env.MONGODB_TEST_URI || '',
         db_name: 'test',
     },
 }
