@@ -36,7 +36,7 @@ const InputField = ({
     return (
         <div className={cn("flex flex-col gap-y-2", className)}>
             <label
-                className={cn('text-text text-opacity-50 text-sm', {
+                className={cn('text text-opacity-50 text-sm', {
                     'text-error': !!error,
                     'text-done': done,
                 })}
