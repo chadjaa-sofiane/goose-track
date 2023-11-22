@@ -5,6 +5,7 @@ import createMongoose from '@/configs/db'
 import authRouter from '@/routes/auth'
 import passport from 'passport'
 import jwtPassport from './configs/passport/jwt'
+import cors from 'cors'
 
 export const mongooseConnection = createMongoose()
 config.env !== 'test' && (await mongooseConnection.connect())
@@ -15,6 +16,7 @@ export const app = express()
 // app middlewares
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use(cors())
 
 // passport middlewares
 jwtPassport(passport)
