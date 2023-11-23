@@ -24,7 +24,7 @@ export const login: RequestHandler = async (
         if (!user) {
             return res
                 .status(401)
-                .json({ data: null, errors: { user: "User doesn't exist" } })
+                .json({ data: null, errors: { email: "User doesn't exist" } })
         }
 
         const passwordMatch = await password.verify(userPassword, user.password)
