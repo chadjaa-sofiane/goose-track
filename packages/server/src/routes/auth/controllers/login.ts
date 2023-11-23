@@ -24,14 +24,17 @@ export const login: RequestHandler = async (
         if (!user) {
             return res
                 .status(401)
-                .json({ data: null, user: "User doesn't exist" })
+                .json({ data: null, errors: { user: "User doesn't exist" } })
         }
 
         const passwordMatch = await password.verify(userPassword, user.password)
         if (!passwordMatch) {
             return res
                 .status(401)
-                .json({ data: null, password: 'Invalid email or password' })
+                .json({
+                    data: null,
+                    errors: { password: 'Invalid email or password' },
+                })
         }
 
         const jwtToken = generateJwtToken({
