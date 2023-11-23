@@ -54,7 +54,8 @@ describe('Login API', () => {
         const response = await request(app).post(path).send(user)
         expect(response.status).toBe(200) // Expect status code 200 (OK)
         expect(response.body.data).toBeDefined() // Verify data
-        expect(response.body.error).toBeNull() // Verify no error
+        expect(response.body.user).toBeUndefined() // Verify no user error
+        expect(response.body.password).toBeUndefined() // Verify no password error
         expect(response.body.token).toBeDefined() // Verify token
         expect(response.body.issues).toBeUndefined() // Verify issues
     })
@@ -65,7 +66,7 @@ describe('Login API', () => {
             password: 'password123AB!',
         })
         expect(response.status).toBe(401) // Expect status code 401 (Unauthorized)
-        expect(response.body.error).toBeDefined() // Verify error
+        expect(response.body.user).toBeDefined() // Verify user error
     })
 
     it('should not login with an incorrect password', async () => {
@@ -85,6 +86,6 @@ describe('Login API', () => {
             password: 'wrongpassword',
         })
         expect(response.status).toBe(401) // Expect status code 401 (Unauthorized)
-        expect(response.body.error).toBeDefined() // Verify error
+        expect(response.body.password).toBeDefined() // Verify password error
     })
 })
