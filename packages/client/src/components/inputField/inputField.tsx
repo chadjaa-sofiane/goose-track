@@ -3,7 +3,7 @@ import React, { ComponentPropsWithoutRef, forwardRef } from 'react'
 import DoneIcon from '@/assets/Done.svg?react'
 import WarningIcon from '@/assets/warning.svg?react'
 
-type Status = 'error' | 'done'
+type Status = 'error' | 'done' | 'normal'
 
 interface InputFieldProps extends ComponentPropsWithoutRef<'input'> {
     type?: 'string' | 'email' | 'password'
@@ -11,13 +11,14 @@ interface InputFieldProps extends ComponentPropsWithoutRef<'input'> {
     name: string
     value?: string
     placeHolder?: string
-    message?: string | null
+    message?: string
     status?: Status
 }
 
 const icon: Record<Status, React.ReactNode> = {
     done: <DoneIcon />,
     error: <WarningIcon />,
+    normal: <></>
 }
 
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>(({
@@ -27,7 +28,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(({
     placeHolder = '',
     value,
     message,
-    status,
+    status = "normal",
     className,
     ...rest
 }, ref) => {
