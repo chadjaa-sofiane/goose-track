@@ -22,11 +22,9 @@ const userSchema = new Schema(
         },
         birthday: {
             type: Date,
-            required: false,
         },
         skype: {
             type: String,
-            required: false,
         },
     },
     {
