@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import React, { ComponentPropsWithoutRef, forwardRef } from 'react'
+import { type ComponentPropsWithoutRef, forwardRef, useId } from 'react'
 import DoneIcon from '@/assets/Done.svg?react'
 import WarningIcon from '@/assets/warning.svg?react'
 
@@ -34,6 +34,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(({
 }, ref) => {
     const error = status == 'error'
     const done = status == 'done'
+    const id = useId()
     return (
         <div className={cn("flex flex-col gap-y-2", className)}>
             <label
@@ -41,6 +42,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(({
                     'text-error': !!error,
                     'text-done': done,
                 })}
+                htmlFor={id}
             >
                 {' '}
                 {label}{' '}
@@ -56,6 +58,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(({
             >
                 <input
                     ref={ref}
+                    id={id}
                     {...rest}
                     type={type}
                     name={name}
