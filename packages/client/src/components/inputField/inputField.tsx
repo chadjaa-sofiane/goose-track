@@ -35,6 +35,14 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(({
     const error = status == 'error'
     const done = status == 'done'
     const id = useId()
+
+
+    // Generate a unique ID for the error message
+    const errorMessageId = useId();
+
+    // Update aria-describedby dynamically based on the presence of an error message
+    const ariaDescribedBy = error ? errorMessageId : undefined;
+
     return (
         <div className={cn("flex flex-col gap-y-2", className)}>
             <label
@@ -65,11 +73,17 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(({
                     value={value}
                     placeholder={placeHolder}
                     className="w-full bg-transparent outline-none"
+                    aria-describedby={ariaDescribedBy}
                 />
                 <div>{status && icon[status]}</div>
             </div>
             {!!message && (
                 <span
+                    role='alert'
+                    id={errorMessageId}
+                    aria-live="assertive"
+                    aria-atomic="true"
+                    data-testid={`error-message-${id}`}
                     className={cn('text-xs px-[1.125em]', {
                         'text-error': error,
                         'text-done': done,
