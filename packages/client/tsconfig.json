@@ -24,7 +24,8 @@
         "allowSyntheticDefaultImports": true,
         "paths": {
             "@/*": ["src/*"]
-        }
+        },
+        // "types": ["@testing-library/jest-dom", "bun-types", "vite"]
     },
     "include": ["src"],
     "exclude": ["node_modules"],
