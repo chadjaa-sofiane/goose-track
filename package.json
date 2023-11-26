@@ -1,27 +1,28 @@
 {
-    "name": "goose-track",
-    "module": "index.ts",
-    "type": "module",
-    "scripts": {
-        "prepare": "husky install"
-    },
-    "devDependencies": {
-        "bun-types": "latest"
-    },
-    "peerDependencies": {
-        "typescript": "^5.0.0"
-    },
-    "workspaces": [
-        "packages/*"
-    ],
-    "dependencies": {
-        "husky": "^8.0.3",
-        "lint-staged": "^15.0.2"
-    },
-    "lint-staged": {
-        "**/*.{js,jsx,ts,tsx}": [
-            "prettier --write",
-            "eslint --fix"
-        ]
-    }
+  "name": "goose-track",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^0.34.6",
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "husky": "^8.0.3",
+    "lint-staged": "^15.0.2"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  }
 }
