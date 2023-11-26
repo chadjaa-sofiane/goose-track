@@ -83,7 +83,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(({
                     id={errorMessageId}
                     aria-live="assertive"
                     aria-atomic="true"
-                    data-testid={`error-message-${id}`}
+                    data-testid={`error-message-${name}`}
                     className={cn('text-xs px-[1.125em]', {
                         'text-error': error,
                         'text-done': done,
