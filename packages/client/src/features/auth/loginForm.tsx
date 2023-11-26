@@ -6,9 +6,13 @@ import LoginWelcomeSrc from "./assets/welcome-login.png"
 import { Link } from "react-router-dom"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { LoginFields, login, loginSchema } from "@/api/authApi"
+import { type Login, type LoginFields, loginSchema } from "@/api/authApi"
 
-const LoginForm = () => {
+interface LoginFormProps {
+    login: Login
+}
+
+const LoginForm = ({ login }: LoginFormProps) => {
     const { register, handleSubmit, formState: { errors, touchedFields }, setError } = useForm<LoginFields>({
         resolver: zodResolver(loginSchema)
     })
@@ -37,13 +41,14 @@ const LoginForm = () => {
     const showPasswordErorr = errors["password"] && touchedFields["password"]
     return <AuthLayout>
         <div className="flex flex-col gap-y-6 items-center">
-            <AuthForm onSubmit={handleSubmit(onSubmit)}>
+            <AuthForm onSubmit={handleSubmit(onSubmit)} error={Object.keys(errors).length > 0}>
                 <h1 className="text-accents-1 text-2xl"> Log In </h1>
                 <div className="flex flex-col gap-y-[1.25em]">
                     <InputField
                         label="email"
                         status={showEmailErorr ? "error" : (touchedFields["email"] ? "done" : "normal")}
                         message={showEmailErorr ? errors["email"]?.message : ""}
+                        placeHolder="enter your email"
                         {...register("email")}
                     />
                     <InputField
@@ -52,6 +57,7 @@ const LoginForm = () => {
                         className=""
                         status={showPasswordErorr ? "error" : (touchedFields["password"] ? "done" : "normal")}
                         message={showPasswordErorr ? errors["password"]?.message : ""}
+                        placeHolder="enter your password"
                         {...register("password")}
                         type="password"
                     />

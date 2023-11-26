@@ -6,9 +6,14 @@ import RegisterWelcomeSrc from "./assets/welcome-register.png"
 import { Link } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { RegisterFields, registerSchema, register as signUp } from "@/api/authApi"
+import { type Register, type RegisterFields, registerSchema } from "@/api/authApi"
 
-const SignUpForm = () => {
+
+interface SignUpFormProps {
+    signUp: Register
+}
+
+const SignUpForm = ({ signUp }: SignUpFormProps) => {
     const { register, handleSubmit, formState: { errors, isSubmitting, touchedFields }, setError } = useForm<RegisterFields>({
         resolver: zodResolver(registerSchema),
         mode: "onBlur"
@@ -34,25 +39,28 @@ const SignUpForm = () => {
     }
     return <AuthLayout>
         <div className="flex flex-col gap-y-6 items-center">
-            <AuthForm onSubmit={handleSubmit(onSubmit)}>
+            <AuthForm onSubmit={handleSubmit(onSubmit)} error={Object.keys(errors).length > 0}>
                 <h1 className="text-accents-1 text-2xl"> Sign up </h1>
                 <div className="flex flex-col gap-y-[1.25em]">
                     <InputField
                         label="name"
                         status={errors["name"] ? "error" : (touchedFields["name"] ? "done" : "normal")}
                         message={errors["name"] ? errors["name"]?.message : ''}
+                        placeHolder="enter your name"
                         {...register("name")}
                     />
                     <InputField
                         label="email"
                         status={errors["email"] ? "error" : (touchedFields["email"] ? "done" : "normal")}
                         message={errors["email"] ? errors["email"]?.message : ""}
+                        placeHolder="enter your email"
                         {...register("email")}
                     />
                     <InputField
                         label="password"
                         status={errors["password"] ? "error" : (touchedFields["password"] ? "done" : "normal")}
                         message={errors["password"] ? errors["password"]?.message : ""}
+                        placeHolder="enter your password"
                         {...register("password")}
                         type="password"
                     />

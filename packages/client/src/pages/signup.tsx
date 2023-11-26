@@ -1,9 +1,11 @@
 import { SignupForm } from "@/features/auth"
 import ThemedLayout from "@/layouts/themedLayout"
+import { register } from "@/api/authApi"
+
 
 const Signup = () => {
     return <ThemedLayout>
-        <SignupForm />
+        <SignupForm signUp={register} />
     </ThemedLayout>
 }
 
