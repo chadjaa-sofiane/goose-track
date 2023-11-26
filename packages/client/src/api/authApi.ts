@@ -20,11 +20,9 @@ type Result<T> = {
     data: unknown
     errors: Partial<T> | null
 }
+export type Login = (inputs: LoginFields) => Promise<Result<LoginFields> | null>
 
-export const login = async ({
-    email,
-    password,
-}: LoginFields): Promise<Result<LoginFields> | null> => {
+export const login: Login = async ({ email, password }) => {
     try {
         const result = await api.post('/auth/login', {
             email,
@@ -69,11 +67,11 @@ export const registerSchema = z.object({
 
 export type RegisterFields = z.infer<typeof registerSchema>
 
-export const register = async ({
-    name,
-    email,
-    password,
-}: RegisterFields): Promise<Result<RegisterFields> | null> => {
+export type Register = (
+    inputs: RegisterFields
+) => Promise<Result<RegisterFields> | null>
+
+export const register: Register = async ({ name, email, password }) => {
     try {
         const result = await api.post('/auth/register', {
             name,
