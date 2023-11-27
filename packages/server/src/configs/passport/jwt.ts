@@ -1,16 +1,18 @@
 import type { PassportStatic } from 'passport'
-import {
-    ExtractJwt,
-    Strategy as JwtStategy,
-    StrategyOptions,
-} from 'passport-jwt'
+import { Strategy as JwtStategy, StrategyOptions } from 'passport-jwt'
 import config from '../config'
 import User from '@/models/user'
 import { Payload } from '@/lib/jsonWebToken'
-// import something from ""
+import { Request } from 'express'
+
+const cookieExtractor = (req: Request) => {
+    if (req && req.cookies) {
+        return req.cookies['access_token']
+    }
+}
 
 const jwtOptions: StrategyOptions = {
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    jwtFromRequest: cookieExtractor,
     secretOrKey: config.publicJwtKey,
     algorithms: ['RS256'],
 }

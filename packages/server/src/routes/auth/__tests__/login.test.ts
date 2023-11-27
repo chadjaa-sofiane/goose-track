@@ -56,7 +56,7 @@ describe('Login API', () => {
         expect(response.body.data).toBeDefined() // Verify data
         expect(response.body.errors?.email).toBeUndefined() // Verify no user error
         expect(response.body.errors?.password).toBeUndefined() // Verify no password error
-        expect(response.body.token).toBeDefined() // Verify token
+        // expect(response.body.token).toBeDefined() // Verify token
         expect(response.body.issues).toBeUndefined() // Verify issues
     })
 

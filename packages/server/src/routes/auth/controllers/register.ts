@@ -49,12 +49,14 @@ export const register: RequestHandler = async (
                 name,
                 email,
             })
+            res.cookie('access_token', jwtToken, {
+                httpOnly: true,
+            })
             return res.status(201).json({
                 error: null,
                 data: {
                     _id: savedUser._id,
-                },
-                token: jwtToken,
+                }
             })
         } catch (error) {
             return res.status(409).json({ error, data: null })

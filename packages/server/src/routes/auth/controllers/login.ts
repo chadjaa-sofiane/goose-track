@@ -29,12 +29,10 @@ export const login: RequestHandler = async (
 
         const passwordMatch = await password.verify(userPassword, user.password)
         if (!passwordMatch) {
-            return res
-                .status(401)
-                .json({
-                    data: null,
-                    errors: { password: 'Invalid email or password' },
-                })
+            return res.status(401).json({
+                data: null,
+                errors: { password: 'Invalid email or password' },
+            })
         }
 
         const jwtToken = generateJwtToken({
@@ -42,7 +40,9 @@ export const login: RequestHandler = async (
             name: user.name,
             email: user.email,
         })
-
+        res.cookie('access_token', jwtToken, {
+            httpOnly: true,
+        })
         return res.status(200).json({
             error: null,
             data: {
@@ -51,8 +51,7 @@ export const login: RequestHandler = async (
                 updatedAt: user.updatedAt,
                 email: user.email,
                 name: user.name,
-            },
-            token: jwtToken,
+            }
         })
     } catch (error) {
         return res.status(500).json(error)
