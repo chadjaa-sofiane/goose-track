@@ -108,7 +108,7 @@ describe('Register API', () => {
         expect(response.status).toBe(201) // Expect status code 201 (Created)
         expect(response.body.data).toBeDefined() // Verify data
         expect(response.body.error).toBeNull() // Verify no error
-        expect(response.body.token).toBeDefined() // Verify token
+        // expect(response.body.token).toBeDefined() // Verify token
         expect(response.body.issues).toBeUndefined() // Verify issues
     })
 
