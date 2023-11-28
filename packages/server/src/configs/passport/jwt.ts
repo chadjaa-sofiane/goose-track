@@ -24,9 +24,9 @@ const jwtPassport = (passport: PassportStatic) => {
             try {
                 const user = await User.findOne({
                     _id: sub,
-                })
+                }).select('-password')
                 if (user) {
-                    return done(null, true)
+                    return done(null, user)
                 }
                 return done(null, false)
             } catch (error) {

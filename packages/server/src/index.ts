@@ -3,6 +3,7 @@ import chalk from 'chalk'
 import config from '@/configs/config'
 import createMongoose from '@/configs/db'
 import authRouter from '@/routes/auth'
+import userRouter from './routes/user '
 import passport from 'passport'
 import jwtPassport from './configs/passport/jwt'
 import cookieParser from "cookie-parser"
@@ -27,6 +28,7 @@ app.use(passport.initialize())
 
 // the routers
 app.use('/auth', authRouter)
+app.use('/user', userRouter)
 
 app.get(
     '/protected-route',
