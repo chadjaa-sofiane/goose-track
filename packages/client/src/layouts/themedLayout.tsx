@@ -6,7 +6,7 @@ interface ThemedLayoutProps {
 }
 
 const ThemedLayout = ({ children, className }: ThemedLayoutProps) => {
-    return <div className={cn("w-full h-full bg-bg text-text", className)}>
+    return <div className={cn("min-w-screen min-h-screen bg-bg text-text", className)}>
         {children}
     </div>
 }
