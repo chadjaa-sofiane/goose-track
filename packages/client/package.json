@@ -29,6 +29,7 @@
   "devDependencies": {
     "@tailwindcss/container-queries": "^0.1.1",
     "@testing-library/jest-dom": "^6.1.4",
+    "@testing-library/react-hooks": "^8.0.1",
     "@testing-library/user-event": "^14.5.1",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",

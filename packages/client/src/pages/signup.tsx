@@ -4,7 +4,7 @@ import { register } from "@/api/authApi"
 
 
 const Signup = () => {
-    return <ThemedLayout>
+    return <ThemedLayout className="bg-[#dcebf7] dark:bg-bg">
         <SignupForm signUp={register} />
     </ThemedLayout>
 }
