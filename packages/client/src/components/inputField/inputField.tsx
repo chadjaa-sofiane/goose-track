@@ -6,7 +6,7 @@ import WarningIcon from '@/assets/warning.svg?react'
 type Status = 'error' | 'done' | 'normal'
 
 interface InputFieldProps extends ComponentPropsWithoutRef<'input'> {
-    type?: 'string' | 'email' | 'password'
+    type?: 'string' | 'email' | 'password' | 'date'
     label: string
     name: string
     value?: string
@@ -46,7 +46,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(({
     return (
         <div className={cn("flex flex-col gap-y-2", className)}>
             <label
-                className={cn('text text-opacity-50 text-sm', {
+                className={cn('dark:text-[#62636a] text-opacity-50 text-sm first-letter:uppercase', {
                     'text-error': !!error,
                     'text-done': done,
                 })}
