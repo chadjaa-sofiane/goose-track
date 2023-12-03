@@ -29,12 +29,12 @@ const NavigationBar = ({ open, setOpen, routes }: NavigationBarProps) => {
             <div className="w-[4.4375em] h-[4.25em]">
                 <img className="object-cover" src={GooseSrc} alt="Goose" />
             </div>
-            <h1 className="font-bold text-2xl">GooseTrack</h1>
+            <h1 className="font-bold text-2xl text-accents-1 dark:text-white">GooseTrack</h1>
             <div className="lg:hidden cursor-pointer" onClick={() => { setOpen(false) }}>
                 <CloseIcon />
             </div>
         </div>
-        <h2 className="dark:text-[#585a5d] font-bold"> User Panel </h2>
+        <h2 className="text-[#999999] dark:text-[#585a5d] font-bold "> User Panel </h2>
         <nav>
             <ul className="flex flex-col gap-y-4">
                 {routes.map(({ path, title, icon }, index) => (
