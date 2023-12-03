@@ -3,7 +3,8 @@ import Home from "./home"
 import NotFound from "./notFound"
 import Login from "./login"
 import Signup from "./signup"
-
+import Dashboard from "./dashboard"
+import DashboardRoutes from "@/features/dashboard/routes"
 
 const router = createBrowserRouter([
     {
@@ -23,6 +24,11 @@ const router = createBrowserRouter([
                 element: <Signup />
             }
         ]
+    },
+    {
+        path: "/dashboard",
+        element: <Dashboard />,
+        children: DashboardRoutes
     }
 ])
 

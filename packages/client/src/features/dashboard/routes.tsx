@@ -25,7 +25,7 @@ const routes: Route[] = [
         path: 'callendar',
         title: "callendar",
         element: <Callendar />,
-        icon: <CallendarIcon />,
+        icon: <CallendarIcon  />,
         pageTitle: "callendar"
     },
     {
