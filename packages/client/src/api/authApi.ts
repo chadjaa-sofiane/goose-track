@@ -16,7 +16,7 @@ export const loginSchema = z.object({
 
 export type LoginFields = z.infer<typeof loginSchema>
 
-type Result<T> = {
+export type Result<T> = {
     data: unknown
     errors: Partial<T> | null
 }
@@ -40,6 +40,7 @@ export const login: Login = async ({ email, password }) => {
                 errors: {
                     ...data.errors,
                     ...extractErrorsFromIssues(data?.issues as ZodIssue[]),
+                    ...extractMongooseErrors(data?.error),
                 },
             }
         }
