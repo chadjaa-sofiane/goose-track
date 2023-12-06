@@ -3,7 +3,8 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "dev": "bun --cwd packages/client dev & bun --cwd packages/server dev"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^0.34.6",
