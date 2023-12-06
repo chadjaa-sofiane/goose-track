@@ -34,10 +34,11 @@ const LoginForm = () => {
                 <Button
                     className="flex justify-center"
                     type="submit"
+                    disabled={isSubmitting}
                     icons={{
                         end: isSubmitting ? <Spinner /> : <DoorIcon className="stroke-white" />
                     }}
-                >Log in</Button>
+                >{isSubmitting ? "loading..." : "Log in"}</Button>
             </AuthForm>
             <div className="absolute hidden right-[5%] bottom-[15%] xl:right-[15%] xl:grid place-items-center -z-10">
                 <img src={LoginWelcomeSrc} alt="Quickly come in and write down your tasks for the day!" />
