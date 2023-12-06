@@ -6,7 +6,7 @@ import authRouter from '@/routes/auth'
 import userRouter from './routes/user '
 import passport from 'passport'
 import jwtPassport from './configs/passport/jwt'
-import cookieParser from "cookie-parser"
+import cookieParser from 'cookie-parser'
 
 import cors from 'cors'
 
@@ -19,7 +19,12 @@ export const app = express()
 // app middlewares
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-app.use(cors())
+app.use(
+    cors({
+        credentials: true,
+        origin: 'http://localhost:5173',
+    })
+)
 app.use(cookieParser())
 
 // passport middlewares
