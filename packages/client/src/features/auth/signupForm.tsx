@@ -4,42 +4,13 @@ import { Button } from "@/components/button"
 import DoorIcon from "@/assets/exit.svg?react"
 import RegisterWelcomeSrc from "./assets/welcome-register.png"
 import { Link } from "react-router-dom"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { type Register, type RegisterFields, registerSchema } from "@/api/authApi"
+import { useSinup } from "./hooks/useSinup"
 
-
-interface SignUpFormProps {
-    signUp: Register
-}
-
-const SignUpForm = ({ signUp }: SignUpFormProps) => {
-    const { register, handleSubmit, formState: { errors, isSubmitting, touchedFields }, setError } = useForm<RegisterFields>({
-        resolver: zodResolver(registerSchema),
-        mode: "onBlur"
-    })
-
-    const onSubmit = async (data: RegisterFields) => {
-        const result = await signUp({
-            email: data.email,
-            password: data.password,
-            name: data.name
-        })
-        if (!result) return
-        if (result.errors) {
-            for (const error in result.errors) {
-                setError(error as keyof RegisterFields, {
-                    type: "manual",
-                    message: result.errors[error as keyof RegisterFields]
-                })
-            }
-            return
-        }
-        alert("you registered successfully")
-    }
+const SignUpForm = () => {
+    const { register, errors, touchedFields, isSubmitting, onSubmit } = useSinup()
     return <AuthLayout>
         <div className="flex flex-col gap-y-6 items-center">
-            <AuthForm onSubmit={handleSubmit(onSubmit)} error={Object.keys(errors).length > 0}>
+            <AuthForm onSubmit={onSubmit} error={Object.keys(errors).length > 0}>
                 <h1 className="text-accents-1 text-2xl"> Sign up </h1>
                 <div className="flex flex-col gap-y-[1.25em]">
                     <InputField

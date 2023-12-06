@@ -1,16 +1,42 @@
-import { it, describe, expect, vi } from "vitest";
+import { it, describe, expect, beforeAll, afterEach, afterAll } from "vitest";
 import { screen } from "@testing-library/react";
 import SignUpForm from "../signupForm";
 import { MemoryRouter } from "react-router-dom";
-import { setup } from "@/setupTests";
-import { register as ApiRegister } from "@/api/authApi";
+import { setupWithStore } from "@/setupTests";
+import { setupServer } from "msw/node";
+import { HttpResponse, delay, http } from "msw";
+
+
+const handlers = [
+    http.post('/auth/register', async () => {
+        await delay(400)
+        return HttpResponse.json({
+            data: null,
+            errors: {
+                name: "name already exists !",
+                email: "email already exists !"
+            }
+        }, { status: 400 })
+    })
+]
+
+const server = setupServer(...handlers)
 
 describe("SignUpForm", () => {
+
+    beforeAll(() => server.listen())
+
+    // Reset any runtime request handlers we may add during the tests.
+    afterEach(() => server.resetHandlers())
+
+    // Disable API mocking after the tests are done.
+    afterAll(() => server.close())
+
+
     it("should render the signup form with all input fields and buttons", () => {
-        const register = vi.fn();
-        setup(
+        setupWithStore(
             <MemoryRouter>
-                <SignUpForm signUp={register} />
+                <SignUpForm />
             </MemoryRouter>
         );
 
@@ -28,10 +54,10 @@ describe("SignUpForm", () => {
     });
 
     it("should display error messages when user provides invalid input", async () => {
-        const register = vi.fn();
-        const { user } = setup(
+
+        const { user } = setupWithStore(
             <MemoryRouter>
-                <SignUpForm signUp={register} />
+                <SignUpForm />
             </MemoryRouter>
         );
         const nameInput = screen.getByLabelText("name") as HTMLInputElement;
@@ -89,19 +115,39 @@ describe("SignUpForm", () => {
         }
     });
 
-    it("should call the register function with valid user input", async () => {
-        const register = vi.fn().mockImplementation(ApiRegister);
-        register.mockResolvedValue({
-            data: null,
-            errors: {
-                name: "name already exists !",
-                email: "email already exists !"
-            }
-        })
-
-        const { user } = setup(
+    it("should have loading while the input is checking", async () => {
+        const { user } = setupWithStore(
             <MemoryRouter>
-                <SignUpForm signUp={register} />
+                <SignUpForm />
+            </MemoryRouter>
+        )
+        const inputs = {
+            name: "Jhon Doe",
+            email: "john@example.com",
+            password: "StrongPassword123&"
+        }
+
+        const nameInput = screen.getByLabelText("name") as HTMLInputElement;
+        await user.type(nameInput, inputs.name);
+
+        const emailInput = screen.getByLabelText("email") as HTMLInputElement;
+        await user.type(emailInput, inputs.email)
+
+        const passwordInput = screen.getByLabelText("password") as HTMLInputElement;
+        await user.type(passwordInput, inputs.password)
+
+        const button = screen.getByRole("button", { name: "Sign up" })
+        await user.click(button)
+
+        expect(button).toHaveTextContent("loading...")
+        expect(button).toBeDisabled()
+    })
+
+    it("should call the register function with valid user input", async () => {
+
+        const { user } = setupWithStore(
+            <MemoryRouter>
+                <SignUpForm />
             </MemoryRouter>
         );
 
@@ -123,15 +169,9 @@ describe("SignUpForm", () => {
         const button = screen.getByRole("button", { name: "Sign up" });
         await user.click(button);
 
-        const nameError = screen.getByTestId("error-message-name");
-        const emailError = screen.getByTestId("error-message-email");
+        const nameError = await screen.findByTestId("error-message-name");
+        const emailError = await screen.findByTestId("error-message-email");
 
-        expect(register).toHaveBeenCalledOnce();
-        expect(register).toHaveBeenCalledWith({
-            name: inputs.name,
-            email: inputs.email,
-            password: inputs.password,
-        });
         expect(nameError).toBeInTheDocument()
         expect(nameError).toHaveTextContent("name already exists !")
 

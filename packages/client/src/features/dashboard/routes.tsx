@@ -1,4 +1,4 @@
-import { type RouteObject } from 'react-router-dom'
+import { Navigate, type RouteObject } from 'react-router-dom'
 import UserCheckIcon from "./assets/user-check.svg?react"
 import CallendarIcon from "./assets/calendar-check.svg?react"
 import ChartIcon from "./assets/chart.svg?react"
@@ -25,7 +25,7 @@ const routes: Route[] = [
         path: 'callendar',
         title: "callendar",
         element: <Callendar />,
-        icon: <CallendarIcon  />,
+        icon: <CallendarIcon />,
         pageTitle: "callendar"
     },
     {
@@ -36,5 +36,11 @@ const routes: Route[] = [
         pageTitle: "statistics"
     }
 ]
+
+export const defaultRoute: RouteObject = {
+    path: "*",
+    element: <Navigate to="/dashboard/account" />
+}
+
 
 export default routes

@@ -16,7 +16,8 @@ export const loginSchema = z.object({
 
 export type LoginFields = z.infer<typeof loginSchema>
 
-type Result<T> = {
+export type Result<T> = {
+    success: boolean
     data: unknown
     errors: Partial<T> | null
 }
@@ -29,6 +30,7 @@ export const login: Login = async ({ email, password }) => {
             password,
         })
         return {
+            success: true,
             data: result.data,
             errors: null,
         }
@@ -36,10 +38,12 @@ export const login: Login = async ({ email, password }) => {
         if (isAxiosError(error)) {
             const data = error.response?.data
             return {
+                success: false,
                 data: null,
                 errors: {
                     ...data.errors,
                     ...extractErrorsFromIssues(data?.issues as ZodIssue[]),
+                    ...extractMongooseErrors(data?.error),
                 },
             }
         }
@@ -79,6 +83,7 @@ export const register: Register = async ({ name, email, password }) => {
             password,
         })
         return {
+            success: true,
             data: result.data,
             errors: null,
         }
@@ -86,6 +91,7 @@ export const register: Register = async ({ name, email, password }) => {
         if (isAxiosError(error)) {
             const data = error.response?.data
             return {
+                success: false,
                 data: null,
                 errors: {
                     ...data?.errors,
