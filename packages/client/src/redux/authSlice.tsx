@@ -1,4 +1,4 @@
-import { type LoginFields, type RegisterFields, type Result, login, register } from "@/api/authApi"
+import { type LoginFields, type RegisterFields, type Result, login, register, logout } from "@/api/authApi"
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit"
 
 interface AuthState {
@@ -22,6 +22,9 @@ export const registerAsync = createAsyncThunk("auth/register", async (credential
     return await register(credentials);
 })
 
+export const logoutAsync = createAsyncThunk('auth/logout', async () => {
+    return await logout();
+});
 
 const authSlice = createSlice({
     name: 'auth',
@@ -48,8 +51,10 @@ const authSlice = createSlice({
             state.registerResult = action.payload
             if (action.payload?.success) {
                 state.isLoggedIn = true
-                
             }
+        })
+        builder.addCase(logoutAsync.fulfilled, (state, action) => {
+            state.isLoggedIn = action.payload
         })
     }
 })
