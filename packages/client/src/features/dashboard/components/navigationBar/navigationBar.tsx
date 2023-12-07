@@ -6,6 +6,8 @@ import ExitIcon from '@/assets/exit.svg?react'
 import CloseIcon from '@/features/dashboard/assets/close.svg?react'
 import { cn } from "@/lib/utils"
 import { type Route } from "@/features/dashboard/routes"
+import { useAppDispatch } from "@/hooks/reduxHooks"
+import { logoutAsync } from "@/redux/authSlice"
 
 
 interface NavigationBarProps {
@@ -14,10 +16,15 @@ interface NavigationBarProps {
     routes: Route[]
 }
 
-
 const NavigationBar = ({ open, setOpen, routes }: NavigationBarProps) => {
     const location = useLocation()
     const currentTab = location.pathname.split("/").at(-1)
+    const dispatch = useAppDispatch()
+
+
+    const handleLogout = async () => {
+        await dispatch(logoutAsync())
+    }
 
     return <div className={cn(
         "fixed top-0 left-0 lg:relative h-screen flex flex-col p-8 gap-y-8 bg-bg transition-transform ease-out duration-300",
@@ -50,7 +57,7 @@ const NavigationBar = ({ open, setOpen, routes }: NavigationBarProps) => {
             </ul>
         </nav>
         <div className="flex-1 flex flex-col justify-end items-start">
-            <Button icons={{ end: <ExitIcon className="stroke-white" aria-label="Log out" /> }}> Log out </Button>
+            <Button onClick={handleLogout} icons={{ end: <ExitIcon className="stroke-white" aria-label="Log out" /> }}> Log out </Button>
         </div>
     </div>
 }

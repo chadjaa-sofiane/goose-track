@@ -47,15 +47,16 @@ const router = createBrowserRouter([
 const Router = () => {
     const dispatch = useAppDispatch()
     const isLoading = useAppSelector(state => state.user.isLoading)
+    const isLoggedIn = useAppSelector(state => state.auth.isLoggedIn)
 
     useEffect(() => {
         const fetchUserData = async () => {
             console.log('this should happend once');
-            
+
             await dispatch(getUserDataAsync())
         }
         fetchUserData()
-    }, [dispatch])
+    }, [dispatch, isLoggedIn])
 
     if (isLoading) {
         return <>
