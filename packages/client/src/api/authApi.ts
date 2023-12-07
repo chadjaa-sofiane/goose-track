@@ -103,3 +103,12 @@ export const register: Register = async ({ name, email, password }) => {
         return null
     }
 }
+
+export const logout = async () => {
+    try {
+        await api.post('/auth/logout')
+        return false
+    } catch (error) {
+        return true
+    }
+}
