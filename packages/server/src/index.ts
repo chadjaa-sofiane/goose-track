@@ -35,14 +35,6 @@ app.use(passport.initialize())
 app.use('/auth', authRouter)
 app.use('/user', userRouter)
 
-app.get(
-    '/protected-route',
-    passport.authenticate('jwt', { session: false }),
-    (req, res) => {
-        res.json({ message: 'Access granted' })
-    }
-)
-
 config.env !== 'test' &&
     app.listen(config.port, () => {
         console.log(
