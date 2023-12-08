@@ -3,6 +3,12 @@ import User from '@/models/user'
 import { z } from 'zod'
 import { removeFalsyFields } from '@/lib/removeFalsyFields'
 
+const MIN_YEAR = new Date(2013, 0, 1)
+const MAX_YEAR = new Date(1900, 0, 1)
+const currentTime = new Date()
+
+const requirementAge = currentTime.getFullYear() - MIN_YEAR.getFullYear()
+
 export const updateUserDataSchema = z.object({
     body: z.object({
         name: z
@@ -18,7 +24,12 @@ export const updateUserDataSchema = z.object({
             .string()
             .min(5, 'Phone number must be at least 5 characters long')
             .optional(),
-        birthday: z.date().optional().nullable(),
+        birthday: z.coerce
+            .date()
+            .max(MIN_YEAR, `you must be oldrer than ${requirementAge} years`)
+            .min(MAX_YEAR, `you are too old to be alive`)
+            .optional()
+            .nullable(),
         skype: z
             .string()
             .min(3, 'Skype username must be at least 3 characters long')
@@ -34,6 +45,7 @@ export const updateUserData: RequestHandler<unknown, unknown, Body> = async (
 ) => {
     const { birthday, email, name, phone, skype } = req.body
     const id = req.user?._id
+
     try {
         const updateFields = removeFalsyFields({
             birthday,
