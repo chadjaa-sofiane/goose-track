@@ -1,4 +1,4 @@
-import requset from 'supertest'
+import request from 'supertest'
 import { it, describe, expect, beforeAll, afterEach, afterAll } from 'bun:test'
 import { app, mongooseConnection } from '@/index'
 import User from '@/models/user'
@@ -40,7 +40,7 @@ describe('updateUserData', () => {
             email: savedUser.email,
         })
 
-        const response = await requset(app)
+        const response = await request(app)
             .put(path)
             .set('Cookie', `access_token=${jwtToken}`)
             .send({
@@ -86,7 +86,7 @@ describe('updateUserData', () => {
             email: savedUser1.email,
         })
 
-        const response = await requset(app)
+        const response = await request(app)
             .put(path)
             .set('Cookie', `access_token=${jwtToken}`)
             .send({
@@ -120,7 +120,7 @@ describe('updateUserData', () => {
             email: savedUser.email,
         })
 
-        const response = await requset(app)
+        const response = await request(app)
             .put(path)
             .set('Cookie', `access_token=${jwtToken}`)
             .send({
@@ -146,7 +146,7 @@ describe('updateUserData', () => {
             password: hashPassword,
         }).save()
 
-        const response = await requset(app).put(path).send({
+        const response = await request(app).put(path).send({
             name: 'John not Doe',
         })
 
@@ -203,16 +203,75 @@ describe('updateUserData', () => {
         })
 
         for (const input of invalidInputs) {
-            const result = await requset(app)
+            const response = await request(app)
                 .put(path)
                 .set('Cookie', `access_token=${jwtToken}`)
                 .send(input)
-            expect(result.status).toBe(400)
+            expect(response.status).toBe(400)
 
-            expect(result.body.issues).toBeDefined()
-            expect(result.body.issues.length).toBeGreaterThanOrEqual(1)
-            expect(result.body.errors).toBeUndefined()
-            expect(result.body.data).toBeUndefined()
+            expect(response.body.issues).toBeDefined()
+            expect(response.body.issues.length).toBeGreaterThanOrEqual(1)
+            expect(response.body.errors).toBeUndefined()
+            expect(response.body.data).toBeUndefined()
+        }
+    })
+
+    it('should validate the time input', async () => {
+        const birthdayInupts = [
+            {
+                // too old
+                inputs: { birthday: '1889-01-12T00:00:00.000Z' },
+                statusCode: 400,
+            },
+            {
+                // too young
+                inputs: { birthday: '2020-01-12T00:00:00.000Z' },
+                statusCode: 400,
+            },
+            {
+                // a valid age
+                inputs: { birthday: '2010-01-12T00:00:00.000Z' },
+                statusCode: 200,
+            },
+        ]
+
+        const user = {
+            name: 'John Doe',
+            email: 'johndoe@email.com', // User already exists
+            password: 'password123AB!',
+        }
+        const hashPassword = await password.hash(user.password, {
+            algorithm: 'argon2d',
+        })
+        const savedUser = await new User({
+            ...user,
+            password: hashPassword,
+        }).save()
+
+        const jwtToken = generateJwtToken({
+            _id: savedUser._id,
+            name: savedUser.name,
+            email: savedUser.email,
+        })
+
+        for (const input of birthdayInupts) {
+            const response = await request(app)
+                .put(path)
+                .set('Cookie', `access_token=${jwtToken}`)
+                .send(input.inputs)
+
+            expect(response.statusCode).toEqual(input.statusCode)
+            switch (input.statusCode){
+                case 400: 
+                    expect(response.body.issues.length).toBeGreaterThanOrEqual(1)
+                    expect(response.body.errors).toBeUndefined()
+                    expect(response.body.data).toBeUndefined()
+                    break
+                case 200: 
+                    expect(response.body.issues).toBeUndefined()
+                    expect(new Date(response.body.data.birthday)).toBeDate()    
+                    expect(new Date(response.body.data.birthday)).toEqual(new Date(input.inputs.birthday))    
+            }
         }
     })
 })
