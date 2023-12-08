@@ -4,7 +4,6 @@ import { mongooseConnection, app } from '@/index'
 import User from '@/models/user'
 import { password } from 'bun'
 import { generateJwtToken } from '@/lib/jsonWebToken'
-import cookieParser from 'cookie-parser'
 
 describe('Login API', () => {
     beforeAll(async () => {
