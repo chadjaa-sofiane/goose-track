@@ -22,6 +22,9 @@ export default {
             fontFamily: {
                 Inter: ['Inter', 'sans-serif'],
             },
+            boxShadow: {
+                button: '0 0 20px 0px hsl(var(--color-accent-1))',
+            },
         },
     },
     plugins: [containerPlugin],
