@@ -9,14 +9,28 @@ interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
     }
 }
 
-const Button = ({ children, icons, className, ...rest }: ButtonProps) => {
+const Button = ({
+    children,
+    icons,
+    className,
+    disabled = false,
+    ...rest
+}: ButtonProps) => {
     return (
         <button
+            disabled={disabled}
             {...rest}
-            className={cn("px-6 py-4 bg-accents-1 text-white rounded-2xl font-bold hover:bg-accents-2 flex items-center gap-x-3", className)}
+            className={cn(
+                'px-6 py-4 bg-accents-1 text-white rounded-2xl font-bold  flex items-center gap-x-3',
+                {
+                    'cursor-not-allowed opacity-50': disabled,
+                    'hover:bg-accents-2 hover:shadow-button': !disabled,
+                },
+                className
+            )}
         >
             {icons?.start && icons.start}
-            <span> {children} </span>
+            <span className="first-letter:uppercase"> {children} </span>
             {icons?.end && icons.end}
         </button>
     )
