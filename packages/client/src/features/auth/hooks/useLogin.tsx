@@ -22,6 +22,7 @@ export const useLogin = () => {
 
     useEffect(() => {
         if (!loginResponse) return
+
         if (loginResponse?.errors)
             mapServerErrorsToForm(setError, loginResponse?.errors)
 
