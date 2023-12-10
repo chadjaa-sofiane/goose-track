@@ -1,54 +1,68 @@
-import { type LoginFields, type RegisterFields, type Result, login, register, logout } from "@/api/authApi"
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit"
+import {
+    type LoginFields,
+    type RegisterFields,
+    login,
+    register,
+    logout,
+    LoginResponse,
+    RegisterResponse,
+} from '@/api/authApi'
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 
 interface AuthState {
-    // you can do this too: loginResult: Awaited<ReturnType<typeof login>>
+    // you can do this too: loginResponse: Awaited<ReturnType<typeof login>>
     isLoggedIn: boolean
-    loginResult: Result<LoginFields> | null
-    registerResult: Result<RegisterFields> | null
+    loginResponse: LoginResponse
+    registerResponse: RegisterResponse
 }
 
 const initialState: AuthState = {
     isLoggedIn: false,
-    loginResult: null,
-    registerResult: null
+    loginResponse: null,
+    registerResponse: null,
 }
 
-export const loginAsync = createAsyncThunk('auth/login', async (credentials: LoginFields) => {
-    return await login(credentials);
-});
+export const loginAsync = createAsyncThunk(
+    'auth/login',
+    async (credentials: LoginFields) => {
+        return await login(credentials)
+    }
+)
 
-export const registerAsync = createAsyncThunk("auth/register", async (credentials: RegisterFields) => {
-    return await register(credentials);
-})
+export const registerAsync = createAsyncThunk(
+    'auth/register',
+    async (credentials: RegisterFields) => {
+        return await register(credentials)
+    }
+)
 
 export const logoutAsync = createAsyncThunk('auth/logout', async () => {
-    return await logout();
-});
+    return await logout()
+})
 
 const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        cleanLoginResult: (state) => {
-            state.loginResult = null;
+        cleanLoginResponse: (state) => {
+            state.loginResponse = null
         },
-        cleanRegisterResult: (state) => {
-            state.registerResult = null;
+        cleanRegisterResponse: (state) => {
+            state.registerResponse = null
         },
         setIsLoggedIn: (state, action: PayloadAction<boolean>) => {
             state.isLoggedIn = action.payload
-        }
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(loginAsync.fulfilled, (state, action) => {
-            state.loginResult = action.payload
+            state.loginResponse = action.payload
             if (action.payload?.success) {
                 state.isLoggedIn = true
             }
         })
         builder.addCase(registerAsync.fulfilled, (state, action) => {
-            state.registerResult = action.payload
+            state.registerResponse = action.payload
             if (action.payload?.success) {
                 state.isLoggedIn = true
             }
@@ -56,8 +70,9 @@ const authSlice = createSlice({
         builder.addCase(logoutAsync.fulfilled, (state, action) => {
             state.isLoggedIn = action.payload
         })
-    }
+    },
 })
 
-export const { cleanLoginResult, cleanRegisterResult, setIsLoggedIn } = authSlice.actions
+export const { cleanLoginResponse, cleanRegisterResponse, setIsLoggedIn } =
+    authSlice.actions
 export default authSlice.reducer
