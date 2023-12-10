@@ -37,6 +37,7 @@ export const login: Login = async ({ email, password }) => {
                 success: false,
                 data: null,
                 errors: {
+                    ...data.errors,
                     ...extractErrorsFromIssues(data?.issues as ZodIssue[]),
                     ...extractMongooseErrors(data?.error),
                 } as LoginFields,
@@ -80,7 +81,6 @@ export const register: Register = async ({ name, email, password }) => {
                 password,
             }
         )
-        result.data
         return {
             success: true,
             data: result.data.data,
@@ -93,6 +93,7 @@ export const register: Register = async ({ name, email, password }) => {
                 success: false,
                 data: null,
                 errors: {
+                    ...data.errors,
                     ...extractErrorsFromIssues(data?.issues as ZodIssue[]),
                     ...extractMongooseErrors(data?.error),
                 } as RegisterFields,
