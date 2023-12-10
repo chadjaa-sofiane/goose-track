@@ -1,10 +1,8 @@
-import { api } from '.'
+import { type Response, api } from '.'
 import { z } from 'zod'
 import { isAxiosError } from 'axios'
 import type { ZodIssue } from 'zod'
 import { extractErrorsFromIssues, extractMongooseErrors } from '@/lib/utils'
-// type path = 'login' | 'register'
-// type authPath = `/auth/${path}`
 
 export const loginSchema = z.object({
     email: z.string().email('please provide a valid email address'),
@@ -16,22 +14,20 @@ export const loginSchema = z.object({
 
 export type LoginFields = z.infer<typeof loginSchema>
 
-export type Result<T> = {
-    success: boolean
-    data: unknown
-    errors: Partial<T> | null
-}
-export type Login = (inputs: LoginFields) => Promise<Result<LoginFields> | null>
+export type LoginResponse = Response<LoginFields> | null
+
+export type Login = (inputs: LoginFields) => Promise<LoginResponse>
 
 export const login: Login = async ({ email, password }) => {
     try {
-        const result = await api.post('/auth/login', {
+        const result = await api.post<{ data: LoginFields }>('/auth/login', {
             email,
             password,
         })
+
         return {
             success: true,
-            data: result.data,
+            data: result.data.data,
             errors: null,
         }
     } catch (error) {
@@ -41,10 +37,9 @@ export const login: Login = async ({ email, password }) => {
                 success: false,
                 data: null,
                 errors: {
-                    ...data.errors,
                     ...extractErrorsFromIssues(data?.issues as ZodIssue[]),
                     ...extractMongooseErrors(data?.error),
-                },
+                } as LoginFields,
             }
         }
         return null
@@ -71,20 +66,24 @@ export const registerSchema = z.object({
 
 export type RegisterFields = z.infer<typeof registerSchema>
 
-export type Register = (
-    inputs: RegisterFields
-) => Promise<Result<RegisterFields> | null>
+export type RegisterResponse = Response<RegisterFields> | null
+
+export type Register = (inputs: RegisterFields) => Promise<RegisterResponse>
 
 export const register: Register = async ({ name, email, password }) => {
     try {
-        const result = await api.post('/auth/register', {
-            name,
-            email,
-            password,
-        })
+        const result = await api.post<{ data: RegisterFields }>(
+            '/auth/register',
+            {
+                name,
+                email,
+                password,
+            }
+        )
+        result.data
         return {
             success: true,
-            data: result.data,
+            data: result.data.data,
             errors: null,
         }
     } catch (error) {
@@ -94,10 +93,9 @@ export const register: Register = async ({ name, email, password }) => {
                 success: false,
                 data: null,
                 errors: {
-                    ...data?.errors,
                     ...extractErrorsFromIssues(data?.issues as ZodIssue[]),
                     ...extractMongooseErrors(data?.error),
-                },
+                } as RegisterFields,
             }
         }
         return null
