@@ -1,12 +1,14 @@
 import { combineSlices, configureStore } from '@reduxjs/toolkit'
 import userReduer from './userSlice'
 import authSlice from './authSlice'
+import calendarReducer from './calendarSlice'
 
 export const createStore = () =>
     configureStore({
         reducer: combineSlices({
             auth: authSlice,
             user: userReduer,
+            calendar: calendarReducer,
         }),
     })
 
