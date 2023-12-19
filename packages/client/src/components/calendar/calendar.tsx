@@ -8,7 +8,7 @@ import dayjs from 'dayjs'
 
 const WEEK_DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 
-const Callender = () => {
+const Calendar = () => {
     const [month, setMonth] = useState(() => dayjs().month())
     const [year, setYear] = useState(() => dayjs().year())
     const [selectedDay, setSelectedDay] = useState<Dayjs | null>(null)
@@ -19,7 +19,7 @@ const Callender = () => {
 
     return (
         <div className="overflow-hidden w-[20.4375em] sm:w-[23.3125em] p-4 bg-accents-1 rounded-lg flex flex-col items-center select-none">
-            <CallenderHeader
+            <CalendarHeader
                 month={month}
                 year={year}
                 setMonth={setMonth}
@@ -27,17 +27,17 @@ const Callender = () => {
             />
             <div className="grid grid-cols-7 ">
                 {WEEK_DAYS.map((day, index) => (
-                    <CallenderCell
+                    <CalendarCell
                         className="font-bold text-sm sm:text-lg"
                         key={index}
                     >
                         {day}
-                    </CallenderCell>
+                    </CalendarCell>
                 ))}
             </div>
             <div className="bg-white bg-opacity-20 w-[110%] sm:w-full h-[1px]" />
             <div className="grid grid-cols-7">
-                {getDaysOfMonth(month, year).map((day, index) =>
+                {getDaysOfMonth(year, month).map((day, index) =>
                     day ? (
                         <DayCell
                             key={index}
@@ -46,7 +46,7 @@ const Callender = () => {
                             handleSelectDay={handleSelectDay}
                         />
                     ) : (
-                        <CallenderCell key={index}> </CallenderCell>
+                        <CalendarCell key={index}> </CalendarCell>
                     )
                 )}
             </div>
@@ -54,19 +54,19 @@ const Callender = () => {
     )
 }
 
-interface CallenderHeaderProps {
+interface CalendarHeaderProps {
     month: number
     year: number
     setMonth: React.Dispatch<React.SetStateAction<number>>
     setYear: React.Dispatch<React.SetStateAction<number>>
 }
 
-const CallenderHeader = ({
+const CalendarHeader = ({
     month,
     year,
     setMonth,
     setYear,
-}: CallenderHeaderProps) => {
+}: CalendarHeaderProps) => {
     const changeMonth = (increment: number) => {
         const date = dayjs().month(month).year(year).add(increment, 'month')
         setMonth(date.month())
@@ -89,17 +89,13 @@ const CallenderHeader = ({
     )
 }
 
-interface CallenderCellProps {
+interface CalendarCellProps {
     children: string | number
     onClick?: React.MouseEventHandler<HTMLDivElement>
     className?: string
 }
 
-const CallenderCell = ({
-    children,
-    onClick,
-    className,
-}: CallenderCellProps) => {
+const CalendarCell = ({ children, onClick, className }: CalendarCellProps) => {
     return (
         <div
             onClick={onClick}
@@ -121,7 +117,7 @@ const DayCell = ({ day, selectedDay, handleSelectDay }: DayCellProps) => {
     const isSelected = day.isSame(selectedDay, 'day')
 
     return (
-        <CallenderCell
+        <CalendarCell
             onClick={() => handleSelectDay(day)}
             className={cn('rounded-full text-sm sm:text-lg ', {
                 'bg-white bg-opacity-20': isToday && !isSelected,
@@ -131,7 +127,7 @@ const DayCell = ({ day, selectedDay, handleSelectDay }: DayCellProps) => {
             })}
         >
             {day.date()}
-        </CallenderCell>
+        </CalendarCell>
     )
 }
-export default Callender
+export default Calendar
