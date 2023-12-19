@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { forwardRef, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks'
 import { cn, debounce, getDaysOfWeek } from '@/lib/utils'
 import {
@@ -17,6 +18,7 @@ import {
     DragStartEvent,
     DragEndEvent,
     useDroppable,
+    DragOverlay,
 } from '@dnd-kit/core'
 import { Task } from '@/redux/calendarSlice'
 
@@ -188,6 +190,7 @@ const TasksContainer = ({
     tasks,
     activeId,
 }: TasksContainerProps) => {
+    const portableRef = useRef<HTMLDivElement>(null)
     const { setNodeRef, isOver, active } = useDroppable({ id })
 
     const sourceContainerId = active?.data?.current?.containerId as string
@@ -196,22 +199,28 @@ const TasksContainer = ({
         <div className="w-[25em] shrink-0 flex flex-col gap-y-7 bg-accents-6 px-5 py-[1.125em] border border-[#42434b] rounded-lg ">
             <div className="flex justify-between">
                 <span className="text-xl first-letter:uppercase font-bold">
-                    {' '}
-                    {title}{' '}
+                    {title}
                 </span>
                 <span className="border-2 border-white rounded-full p-0.5 grid place-items-center">
-                    {' '}
-                    <PlusIcon />{' '}
+                    <PlusIcon />
                 </span>
             </div>
 
-            <ul
-                ref={setNodeRef}
-                className="flex-1 flex flex-col gap-y-8"
-                // onPointerDownCapture={e => e.stopPropagation()}
-            >
+            {activeId && (
+                <DragOverlay>
+                    <PortableElement ref={portableRef} />
+                </DragOverlay>
+            )}
+
+            <ul ref={setNodeRef} className="flex-1 flex flex-col gap-y-8">
                 {tasks.map((task) => (
-                    <Draggable id={task.id} key={task.id} containerId={id}>
+                    <Draggable
+                        key={task.id}
+                        id={task.id}
+                        containerId={id}
+                        activeId={activeId}
+                        overlayElement={portableRef.current}
+                    >
                         <Task task={task} />
                     </Draggable>
                 ))}
@@ -221,8 +230,7 @@ const TasksContainer = ({
             </ul>
             <div className="w-full mt-auto">
                 <Button className="w-full grid place-items-center">
-                    {' '}
-                    Add Task{' '}
+                    Add Task
                 </Button>
             </div>
         </div>
@@ -233,24 +241,28 @@ interface DraggableProps {
     children: React.ReactNode
     id: string
     containerId: string
+    activeId?: string | null
+    overlayElement?: HTMLDivElement | null
 }
 
-const Draggable = ({ children, id, containerId }: DraggableProps) => {
-    const { setNodeRef, listeners, attributes, isDragging, transform } =
-        useDraggable({ id, data: { containerId } })
-    const style = transform
-        ? {
-              transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-          }
-        : undefined
+const Draggable = ({
+    children,
+    id,
+    containerId,
+    activeId,
+    overlayElement,
+}: DraggableProps) => {
+    const { setNodeRef, listeners, attributes, isDragging } = useDraggable({
+        id,
+        data: { containerId },
+    })
 
     return (
         <li
             ref={setNodeRef}
             {...listeners}
             {...attributes}
-            className={cn({ 'opacity-60 touch-none': isDragging })}
-            style={style}
+            className={cn({ 'opacity-60': isDragging })}
             onPointerDownCapture={(e) => {
                 e.stopPropagation()
                 if (listeners) {
@@ -258,6 +270,9 @@ const Draggable = ({ children, id, containerId }: DraggableProps) => {
                 }
             }}
         >
+            {overlayElement &&
+                activeId === id &&
+                createPortal(children, overlayElement)}
             {children}
         </li>
     )
@@ -280,5 +295,9 @@ const ListPreview = () => {
         <div className="w-full h-12 p-3.5 bg-accents-1 bg-opacity-5 border-2 border-accents-1 rounded-md" />
     )
 }
+
+const PortableElement = forwardRef<HTMLDivElement>((_, ref) => {
+    return <div ref={ref} className="w-[25em] h-4"></div>
+})
 
 export default CalendarDay
