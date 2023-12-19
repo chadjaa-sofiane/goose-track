@@ -27,7 +27,7 @@ const NavigationBar = ({ open, setOpen, routes }: NavigationBarProps) => {
     return (
         <div
             className={cn(
-                'fixed top-0 left-0 lg:relative h-screen flex flex-col p-8 gap-y-8 bg-bg transition-transform ease-out duration-300 z-10',
+                'lg:w-2/12 fixed top-0 left-0 lg:relative h-screen flex flex-col p-8 gap-y-8 bg-bg transition-transform ease-out duration-300 z-10',
                 {
                     '-translate-x-full lg:translate-x-0': !open,
                 }
@@ -81,8 +81,7 @@ const NavigationBar = ({ open, setOpen, routes }: NavigationBarProps) => {
                         ),
                     }}
                 >
-                    {' '}
-                    Log out{' '}
+                    Log out
                 </Button>
             </div>
         </div>
