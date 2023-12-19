@@ -28,21 +28,48 @@ export const cn = (...inputs: ClassValue[]) => {
  */
 
 export const getDaysOfMonth = (
-    month = dayjs().month(),
-    year = dayjs().year()
+    year = dayjs().year(),
+    month = dayjs().month()
 ) => {
     const firstDateOfMonth = dayjs().year(year).month(month).startOf('month')
     const lastDateOfMonth = dayjs().year(year).month(month).endOf('month')
 
     const daysOfMonth = []
-    for (let i = 1; i < firstDateOfMonth.day(); i++) {
-        daysOfMonth.push(null)
+
+    for (let i = 0; i < firstDateOfMonth.day(); i++) {
+        daysOfMonth.push(firstDateOfMonth.day(i))
     }
     for (let i = firstDateOfMonth.date(); i <= lastDateOfMonth.date(); i++) {
         daysOfMonth.push(firstDateOfMonth.date(i))
     }
 
+    for (
+        let i = lastDateOfMonth.day();
+        i < lastDateOfMonth.endOf('week').day();
+        i++
+    ) {
+        daysOfMonth.push(lastDateOfMonth.day(i))
+    }
     return daysOfMonth
+}
+
+export const getDaysOfWeek = (
+    year = dayjs().month(),
+    month = dayjs().month(),
+    date = dayjs().date()
+) => {
+    const startOfTheWeek = dayjs()
+        .year(year)
+        .month(month)
+        .date(date)
+        .startOf('week')
+
+    const daysOfWeek = []
+    for (let i = startOfTheWeek.date(); i <= startOfTheWeek.date() + 6; i++) {
+        daysOfWeek.push(startOfTheWeek.date(i))
+    }
+
+    return daysOfWeek
 }
 
 /**
@@ -112,11 +139,18 @@ export const mapServerErrorsToForm = <
             message: value,
         })
     }
-    // Object.entries(errors).forEach(([field, errorMessage]) => {
-    //     setError(
-    //         field as Path<Required<T>>,
-    //         { message: errorMessage },
-    //         { shouldFocus: true }
-    //     )
-    // })
+}
+
+export const debounce = <F extends (...args: unknown[]) => unknown>(
+    func: F,
+    delay: number
+) => {
+    let timeout: ReturnType<typeof setTimeout> | null = null
+
+    return (...args: unknown[]) => {
+        if (timeout) {
+            clearTimeout(timeout)
+        }
+        timeout = setTimeout(() => func(...args), delay)
+    }
 }
