@@ -15,20 +15,20 @@ const DashboardLayout = () => {
 
     return (
         <ThemedLayout className="min-h-screen bg-[#dcebf7] dark:bg-bg">
-            <main className="flex items-stretch">
+            <div className="flex">
                 <NavigationBar
                     open={openNav}
                     setOpen={setOpenNav}
                     routes={DashboardRoutesfrom}
                 />
-                <div className="w-full min-h-screen h-fit flex flex-col gap-y-[2.375em] px-5 py-6 md:py-8 md:px-[2.875em] dark:bg-[#171820]">
+                <main className="w-full lg:w-10/12 min-h-screen h-fit flex flex-col gap-y-[2.375em] px-5 py-6 md:py-8 md:px-[2.875em] dark:bg-[#171820]">
                     <Outlet
                         context={
                             { openNav, setOpenNav } satisfies OutletContextType
                         }
                     />
-                </div>
-            </main>
+                </main>
+            </div>
         </ThemedLayout>
     )
 }
@@ -46,9 +46,7 @@ export const DashboardPageLayout = ({
     return (
         <>
             <Header title={title} setOpen={setOpenNav} />
-            <section className="flex flex-col justify-center">
-                {children}
-            </section>
+            {children}
         </>
     )
 }
