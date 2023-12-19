@@ -17,6 +17,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "@dnd-kit/core": "^6.1.0",
     "framer-motion": "^10.16.16",
     "husky": "^8.0.3",
     "lint-staged": "^15.0.2"
