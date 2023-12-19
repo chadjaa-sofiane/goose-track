@@ -1,10 +1,10 @@
 import { Navigate, type RouteObject } from 'react-router-dom'
 import UserCheckIcon from './assets/user-check.svg?react'
-import CallendarIcon from './assets/calendar-check.svg?react'
+import CalendarIcon from './assets/calendar-check.svg?react'
 import ChartIcon from './assets/chart.svg?react'
-import Callendar from './callendar'
 import Statistics from './statistics'
 import { Profile } from './profile'
+import Calendar from './calendar/calendar'
 
 export type Route = {
     title: string
@@ -21,10 +21,10 @@ const routes: Route[] = [
         pageTitle: 'user profile',
     },
     {
-        path: 'callendar',
-        title: 'callendar',
-        element: <Callendar />,
-        icon: <CallendarIcon />,
+        path: 'calendar',
+        title: 'calendar',
+        element: <Calendar />,
+        icon: <CalendarIcon />,
         pageTitle: 'callendar',
     },
     {
