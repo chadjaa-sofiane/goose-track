@@ -154,3 +154,16 @@ export const debounce = <F extends (...args: unknown[]) => unknown>(
         timeout = setTimeout(() => func(...args), delay)
     }
 }
+
+/**
+ * Parses a time string in the format "HH:MM" and returns the time as milliseconds since midnight.
+ * @param timeString - A string representing a time in the format "HH:MM".
+ * @returns The time represented by the timeString as milliseconds since midnight.
+ */
+export const parseTime = (timeString: string): number => {
+    const [hours, minutes] = timeString.split(':').map(Number)
+    const timeAsDate = new Date()
+    timeAsDate.setHours(hours, minutes, 0, 0) // Set hours, minutes, seconds, and milliseconds
+
+    return timeAsDate.getTime()
+}
