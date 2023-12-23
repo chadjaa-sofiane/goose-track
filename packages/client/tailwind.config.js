@@ -14,6 +14,11 @@ export default {
                     5: 'hsl(var(--color-accent-5) / <alpha-value>)',
                     6: 'hsl(var(--color-accent-6) / <alpha-value>)',
                 },
+                priorities: {
+                    low: 'hsl(var(--color-priority-low) / <alpha-value>)',
+                    medium: 'hsl(var(--color-priority-medium )/ <alpha-value>)',
+                    high: 'hsl(var( --color-priority-high)/ <alpha-value>)',
+                },
                 bg: 'hsl(var(--color-bg) / <alpha-value>)',
                 text: 'hsl(var(--color-text) / <alpha-value>)',
                 error: 'hsl(var(--color-error) / <alpha-value>)',

@@ -12,6 +12,10 @@
     --color-accent-6: 235deg 14% 15%;
     --color-error: 0deg 83% 47%;
     --color-done: 152deg 52% 49%;
+
+    --color-priority-low: 204deg 91% 71%;
+    --color-priority-medium: 37deg 88% 62%;
+    --color-priority-high: 346deg 80% 58%;
 }
 
 #root {
