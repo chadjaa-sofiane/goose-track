@@ -1,6 +1,8 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 import dayjs from 'dayjs'
 import { doneList, inProgressList, toDoList } from './data/tasks'
+import { addTaskFields } from '@/api/calendarApi'
+import { TaskContainerId } from '@/features/dashboard/calendar/components/calendarBody/calendarDay'
 
 export const DISPLAY = ['month', 'day'] as const
 export type Display = (typeof DISPLAY)[number]
@@ -14,12 +16,15 @@ export const WEEK_DAYS = [
     'SAT',
 ] as const
 
+export const priorites = ['low', 'medium', 'high'] as const
+
 export type Task = {
     id: string
     userId: string
     title: string
     start: string
     end: string
+    // status?: number
 }
 
 interface CalendarState {
@@ -32,6 +37,7 @@ interface CalendarState {
     toDoList: Task[]
     inProgressList: Task[]
     doneList: Task[]
+    // tasks: Task[]
 }
 
 const initialState: CalendarState = {
@@ -44,6 +50,7 @@ const initialState: CalendarState = {
     toDoList,
     inProgressList,
     doneList,
+    // tasks: tasks
 }
 
 const changeMonth = (month: number, year: number, increment: number) => {
@@ -165,8 +172,47 @@ const calendarSlice = createSlice({
             )
             state.doneList = moveTaskToList(id, state.doneList, state.toDoList)
         },
+        addTask: {
+            reducer: (
+                state,
+                action: PayloadAction<
+                    addTaskFields & { field: TaskContainerId; id: string }
+                >
+            ) => {
+                const field = action.payload.field
+                const taskInput = action.payload
+                const newTask: Task = {
+                    userId: 'YourUserId',
+                    ...taskInput,
+                }
+                switch (field) {
+                    case 'todo': {
+                        state.toDoList.push(newTask)
+                        break
+                    }
+                    case 'progress': {
+                        state.inProgressList.push(newTask)
+                        break
+                    }
+                    case 'done': {
+                        state.doneList.push(newTask)
+                        break
+                    }
+                }
+            },
+            prepare: (inputs: addTaskFields & { field: TaskContainerId }) => {
+                const id = generateTemporaryId()
+                return { payload: { ...inputs, id } }
+            },
+        },
     },
 })
+
+function generateTemporaryId() {
+    const timestamp = Math.floor(Date.now() / 1000)
+    const randomPart = Math.random().toString(36).substring(2, 7)
+    return `${timestamp}-${randomPart}`
+}
 
 export const {
     nextMonth,
@@ -177,5 +223,6 @@ export const {
     markTaskAsDone,
     markTaskAsInProgress,
     markTaskAsToDo,
+    addTask,
 } = calendarSlice.actions
 export default calendarSlice.reducer
