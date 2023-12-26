@@ -5,17 +5,19 @@ import CloseIcon from '@/features/dashboard/assets/close.svg?react'
 import { InputField } from '@/components/inputField'
 import { useForm } from 'react-hook-form'
 import { cn } from '@/lib/utils'
-import { TaskContainerId } from './calendarDay'
 import { useAppDispatch } from '@/hooks/reduxHooks'
 import { addTask, priorites } from '@/redux/calendarSlice'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addTaskFields, addTaskschema } from '@/api/calendarApi'
+import PlusIcon from '@/assets/plus.svg?react'
 
 interface AddTaskProps {
-    field: TaskContainerId
+    container: string
+    date: string
+    title: string
 }
 
-const AddTask = ({ field }: AddTaskProps) => {
+const AddTask = ({ container, date, title }: AddTaskProps) => {
     const [open, setOpen] = useState(false)
     const dispatch = useAppDispatch()
 
@@ -37,18 +39,27 @@ const AddTask = ({ field }: AddTaskProps) => {
 
     const addTaskHandler = (data: addTaskFields) => {
         const priority = getValues().priority
-        dispatch(addTask({ field, ...data, priority }))
+        dispatch(addTask({ container, date, ...data, priority }))
         setOpen(false)
         reset()
     }
 
     return (
         <>
-            <Button onClick={() => setOpen(true)}> Add Task</Button>
+            <Button
+                onClick={() => setOpen(true)}
+                icons={{
+                    start: <PlusIcon />,
+                }}
+                className="w-full flex items-center justify-center gap-x-2"
+            >
+                {' '}
+                Add Task
+            </Button>
             <Dialog open={open} setOpen={setOpen}>
                 <form onSubmit={handleSubmit(addTaskHandler)}>
                     <DialogContent className="relative w-[24.75em] px-7 py-10 flex flex-col gap-y-8">
-                        {field}
+                        {title}
                         <div className="absolute right-3.5 top-3.5 flex justify-end cursor-pointer">
                             <CloseIcon
                                 onClick={() => setOpen(false)}
