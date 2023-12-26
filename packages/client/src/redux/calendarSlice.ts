@@ -1,8 +1,7 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 import dayjs from 'dayjs'
-import { doneList, inProgressList, toDoList } from './data/tasks'
+import { Tasks, tasks } from './data/tasks'
 import { addTaskFields } from '@/api/calendarApi'
-import { TaskContainerId } from '@/features/dashboard/calendar/components/calendarBody/calendarDay'
 
 export const DISPLAY = ['month', 'day'] as const
 export type Display = (typeof DISPLAY)[number]
@@ -25,6 +24,8 @@ export type Task = {
     start: string
     end: string
     // status?: number
+    date: string
+    priority: (typeof priorites)[number]
 }
 
 interface CalendarState {
@@ -34,10 +35,7 @@ interface CalendarState {
     currentMonth: number
     currentYear: number
     display: Display
-    toDoList: Task[]
-    inProgressList: Task[]
-    doneList: Task[]
-    // tasks: Task[]
+    tasks: Tasks
 }
 
 const initialState: CalendarState = {
@@ -47,9 +45,7 @@ const initialState: CalendarState = {
     currentMonth: dayjs().month(),
     currentYear: dayjs().year(),
     display: 'month',
-    toDoList,
-    inProgressList,
-    doneList,
+    tasks,
     // tasks: tasks
 }
 
@@ -77,19 +73,6 @@ const changeDate = (
         month: newDate.month(),
         date: newDate.date(),
     }
-}
-
-const moveTaskToList = (
-    taskId: string,
-    sourceList: Task[],
-    destList: Task[]
-) => {
-    const task = sourceList.find((task) => task.id === taskId)
-    if (task) {
-        destList.push(task)
-        return sourceList.filter(({ id }) => id !== task.id)
-    }
-    return sourceList
 }
 
 const calendarSlice = createSlice({
@@ -135,75 +118,91 @@ const calendarSlice = createSlice({
             state.month = month
             state.year = year
         },
-        // Action to mark a todo as done
-
-        markTaskAsDone: (state, action: PayloadAction<string>) => {
-            const id = action.payload
-            state.toDoList = moveTaskToList(id, state.toDoList, state.doneList)
-            state.inProgressList = moveTaskToList(
-                id,
-                state.inProgressList,
-                state.doneList
-            )
+        setDate: (
+            state,
+            action: PayloadAction<{ year: number; month: number; date: number }>
+        ) => {
+            state.year = action.payload.year
+            state.month = action.payload.month
+            state.date = action.payload.date
         },
-
-        // Action to mark a todo as In Progress
-        markTaskAsInProgress: (state, action: PayloadAction<string>) => {
-            const id = action.payload
-            state.toDoList = moveTaskToList(
-                id,
-                state.toDoList,
-                state.inProgressList
-            )
-            state.doneList = moveTaskToList(
-                id,
-                state.doneList,
-                state.inProgressList
-            )
+        markTask: (
+            state,
+            action: PayloadAction<{
+                date: string
+                container: string
+                id: string
+            }>
+        ) => {
+            const { container: targetContainer, date, id } = action.payload
+            const containers = state.tasks[date].containers
+            let task: Task | undefined
+            for (const containerKey in containers) {
+                if (containerKey !== targetContainer) {
+                    const container = containers[containerKey]
+                    task = container.tasks.find((task) => task.id === id)
+                    if (task) {
+                        container.tasks = container.tasks.filter(
+                            (task) => task.id !== id
+                        )
+                        break
+                    }
+                }
+            }
+            if (task) containers[targetContainer].tasks.push(task)
         },
-
-        // Action to mark a todo as To-Do
-        markTaskAsToDo: (state, action: PayloadAction<string>) => {
-            const id = action.payload
-            state.inProgressList = moveTaskToList(
-                id,
-                state.inProgressList,
-                state.toDoList
-            )
-            state.doneList = moveTaskToList(id, state.doneList, state.toDoList)
+        createDayTask: (state, action: PayloadAction<{ date: string }>) => {
+            const { date } = action.payload
+            state.tasks = {
+                ...state.tasks,
+                [date]: {
+                    containers: {
+                        todo: {
+                            order: 0,
+                            title: 'to do list',
+                            tasks: [],
+                        },
+                    },
+                },
+            }
         },
         addTask: {
             reducer: (
                 state,
                 action: PayloadAction<
-                    addTaskFields & { field: TaskContainerId; id: string }
+                    addTaskFields & {
+                        container: string
+                        id: string
+                        date: string
+                    }
                 >
             ) => {
-                const field = action.payload.field
+                const container = action.payload.container
                 const taskInput = action.payload
-                const newTask: Task = {
-                    userId: 'YourUserId',
+                const date = action.payload.date
+                state.tasks[date].containers[container].tasks.push({
                     ...taskInput,
-                }
-                switch (field) {
-                    case 'todo': {
-                        state.toDoList.push(newTask)
-                        break
-                    }
-                    case 'progress': {
-                        state.inProgressList.push(newTask)
-                        break
-                    }
-                    case 'done': {
-                        state.doneList.push(newTask)
-                        break
-                    }
-                }
+                    userId: 'sometihng',
+                })
             },
-            prepare: (inputs: addTaskFields & { field: TaskContainerId }) => {
+            prepare: (
+                inputs: addTaskFields & { container: string; date: string }
+            ) => {
                 const id = generateTemporaryId()
                 return { payload: { ...inputs, id } }
             },
+        },
+        deleteTask: (
+            state,
+            action: PayloadAction<{
+                date: string
+                container: string
+                id: string
+            }>
+        ) => {
+            const { date, container: targetContainer, id } = action.payload
+            const container = state.tasks[date].containers[targetContainer]
+            container.tasks = container.tasks.filter((task) => task.id !== id)
         },
     },
 })
@@ -220,9 +219,10 @@ export const {
     setDisplay,
     nextWeek,
     prevWeek,
-    markTaskAsDone,
-    markTaskAsInProgress,
-    markTaskAsToDo,
+    setDate,
+    markTask,
+    createDayTask,
     addTask,
+    deleteTask,
 } = calendarSlice.actions
 export default calendarSlice.reducer
