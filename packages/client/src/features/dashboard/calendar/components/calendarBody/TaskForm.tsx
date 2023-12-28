@@ -7,8 +7,10 @@ import { type UseFormReset, useForm } from 'react-hook-form'
 import { cn } from '@/lib/utils'
 import { useAppDispatch } from '@/hooks/reduxHooks'
 import {
+    Task,
     TaskFormReducerPayload,
     addTask,
+    editTask,
     priorites,
 } from '@/redux/calendarSlice'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -19,22 +21,28 @@ interface TaskFormProps {
     container: string
     date: string
     title: string
-    onSumbit: (
+    onSubmit: (
         inputs: TaskFormReducerPayload,
         reset: UseFormReset<TaskFormFields>
     ) => void
     defaultFields?: TaskFormFields
+    open: boolean
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>
+    children?: React.ReactNode
+    submitTitle: string
 }
 
 const TaskForm = ({
     container,
     date,
     title,
-    onSumbit,
+    onSubmit,
     defaultFields,
+    open,
+    setOpen,
+    children,
+    submitTitle,
 }: TaskFormProps) => {
-    const [open, setOpen] = useState(false)
-
     const {
         register,
         handleSubmit,
@@ -54,7 +62,7 @@ const TaskForm = ({
 
     const addTaskHandler = (data: TaskFormFields) => {
         const priority = getValues().priority
-        onSumbit({ container, date, ...data, priority }, reset)
+        onSubmit({ container, date, ...data, priority }, reset)
         setOpen(false)
     }
 
@@ -64,15 +72,7 @@ const TaskForm = ({
 
     return (
         <>
-            <Button
-                onClick={() => setOpen(true)}
-                icons={{
-                    start: <PlusIcon />,
-                }}
-                className="w-full flex items-center justify-center gap-x-2"
-            >
-                Add Task
-            </Button>
+            {children}
             <Dialog open={open} setOpen={setOpen}>
                 <form onSubmit={handleSubmit(addTaskHandler)}>
                     <DialogContent className="relative w-[24.75em] px-7 py-10 flex flex-col gap-y-8">
@@ -163,7 +163,7 @@ const TaskForm = ({
                                 type="submit"
                                 className="flex-1 grid place-items-center"
                             >
-                                add
+                                {submitTitle}
                             </Button>
                             <Button
                                 type="button"
@@ -226,14 +226,99 @@ export const PriorityRadio = forwardRef<HTMLInputElement, PriorityRadio>(
     }
 )
 
-export const AddTask = (props: Omit<TaskFormProps, 'onSumbit'>) => {
+export const AddTask = (
+    props: Omit<
+        TaskFormProps,
+        | 'onSubmit'
+        | 'open'
+        | 'setOpen'
+        | 'children'
+        | 'defaultFields'
+        | 'submitTitle'
+    >
+) => {
+    const [open, setOpen] = useState(false)
     const dispatch = useAppDispatch()
-    const addTaskHundler: TaskFormProps['onSumbit'] = (inputs, reset) => {
+    const addTaskHundler: TaskFormProps['onSubmit'] = (inputs, reset) => {
         const { container, date, ...data } = inputs
         dispatch(addTask({ container, date, ...data }))
         reset()
     }
-    return <TaskForm {...props} onSumbit={addTaskHundler} />
+    return (
+        <TaskForm
+            {...props}
+            onSubmit={addTaskHundler}
+            open={open}
+            setOpen={setOpen}
+            submitTitle="Add"
+        >
+            <Button
+                onClick={() => setOpen(true)}
+                icons={{
+                    start: <PlusIcon />,
+                }}
+                className="w-full flex items-center justify-center gap-x-2"
+            >
+                Add Task
+            </Button>
+        </TaskForm>
+    )
+}
+
+type EditTaskProps = Omit<
+    TaskFormProps,
+    | 'onSubmit'
+    | 'open'
+    | 'setOpen'
+    | 'children'
+    | 'defaultFields'
+    | 'submitTitle'
+>
+
+export const UseEditTask = ({ ...rest }: EditTaskProps) => {
+    const [open, setOpen] = useState(false)
+    const [currentTask, setcurrentTask] = useState<Task | null>(null)
+    const dispatch = useAppDispatch()
+
+    const handleEditTask: TaskFormProps['onSubmit'] = (inputs) => {
+        if (currentTask) {
+            const { container, date, ...data } = inputs
+            dispatch(
+                editTask({ container, date, taskId: currentTask.id, ...data })
+            )
+        }
+    }
+
+    const openEditTask = (updateTask: Task) => {
+        setcurrentTask(updateTask)
+        setOpen(true)
+    }
+
+    useEffect(() => {
+        if (open === false) {
+            setcurrentTask(null)
+        }
+    }, [open])
+
+    return {
+        EditTask: () =>
+            currentTask && (
+                <TaskForm
+                    {...rest}
+                    defaultFields={{
+                        title: currentTask.title,
+                        start: currentTask.start,
+                        end: currentTask.end,
+                        priority: currentTask.priority,
+                    }}
+                    open={open}
+                    setOpen={setOpen}
+                    onSubmit={handleEditTask}
+                    submitTitle="Edit"
+                />
+            ),
+        openEditTask,
+    }
 }
 
 export default TaskForm
