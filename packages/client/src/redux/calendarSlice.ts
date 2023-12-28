@@ -1,7 +1,7 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 import dayjs from 'dayjs'
 import { Tasks, tasks } from './data/tasks'
-import { addTaskFields } from '@/api/calendarApi'
+import { TaskFormFields } from '@/api/calendarApi'
 
 export const DISPLAY = ['month', 'day'] as const
 export type Display = (typeof DISPLAY)[number]
@@ -55,6 +55,11 @@ const changeMonth = (month: number, year: number, increment: number) => {
         year: date.year(),
         month: date.month(),
     }
+}
+
+export type TaskFormReducerPayload = TaskFormFields & {
+    container: string
+    date: string
 }
 
 const changeDate = (
@@ -169,13 +174,7 @@ const calendarSlice = createSlice({
         addTask: {
             reducer: (
                 state,
-                action: PayloadAction<
-                    addTaskFields & {
-                        container: string
-                        id: string
-                        date: string
-                    }
-                >
+                action: PayloadAction<TaskFormReducerPayload & { id: string }>
             ) => {
                 const container = action.payload.container
                 const taskInput = action.payload
@@ -185,9 +184,7 @@ const calendarSlice = createSlice({
                     userId: 'sometihng',
                 })
             },
-            prepare: (
-                inputs: addTaskFields & { container: string; date: string }
-            ) => {
+            prepare: (inputs: TaskFormReducerPayload) => {
                 const id = generateTemporaryId()
                 return { payload: { ...inputs, id } }
             },
@@ -197,12 +194,38 @@ const calendarSlice = createSlice({
             action: PayloadAction<{
                 date: string
                 container: string
-                id: string
+                taskId: string
             }>
         ) => {
-            const { date, container: targetContainer, id } = action.payload
+            const { date, container: targetContainer, taskId } = action.payload
             const container = state.tasks[date].containers[targetContainer]
-            container.tasks = container.tasks.filter((task) => task.id !== id)
+            container.tasks = container.tasks.filter(
+                (task) => task.id !== taskId
+            )
+        },
+
+        editTask: (
+            state,
+            action: PayloadAction<TaskFormReducerPayload & { taskId: string }>
+        ) => {
+            const {
+                container: targetContainer,
+                date,
+                taskId,
+                ...updatedTask
+            } = action.payload
+            const container = state.tasks[date]?.containers[targetContainer]
+            if (!container) return
+            const taskIndex = container?.tasks.findIndex(
+                (task) => task.id === taskId
+            )
+
+            if (taskIndex !== -1) {
+                container.tasks[taskIndex] = {
+                    ...container.tasks[taskIndex],
+                    ...updatedTask,
+                }
+            }
         },
     },
 })
@@ -224,5 +247,6 @@ export const {
     createDayTask,
     addTask,
     deleteTask,
+    editTask,
 } = calendarSlice.actions
 export default calendarSlice.reducer
