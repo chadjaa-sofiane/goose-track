@@ -17,7 +17,7 @@ const validTime = (value: string) => {
     return true
 }
 
-export const addTaskschema = z
+export const taskFormSchema = z
     .object({
         title: z
             .string()
@@ -31,6 +31,6 @@ export const addTaskschema = z
         path: ['start'],
     })
 
-export type addTaskFields = z.infer<typeof addTaskschema> & {
+export type TaskFormFields = z.infer<typeof taskFormSchema> & {
     priority: (typeof priorites)[number]
 }
