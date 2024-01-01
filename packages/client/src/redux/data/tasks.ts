@@ -1,7 +1,7 @@
 import { Task } from '../calendarSlice'
 
 type Container = {
-    order: number
+    // order: number
     title: string
     tasks: Task[]
 }
@@ -9,15 +9,16 @@ type Container = {
 export type Tasks = Record<
     string,
     {
+        containersOrder: string[]
         containers: Record<string, Container>
     }
 >
 
 export const tasks: Tasks = {
     '2023-11-28': {
+        containersOrder: ['todo', 'inProgressList', 'doneList'],
         containers: {
             todo: {
-                order: 1,
                 title: 'to do list',
                 tasks: [
                     {
@@ -50,7 +51,6 @@ export const tasks: Tasks = {
                 ],
             },
             inProgressList: {
-                order: 2,
                 title: 'progress list',
                 tasks: [
                     {
@@ -83,7 +83,6 @@ export const tasks: Tasks = {
                 ],
             },
             doneList: {
-                order: 3,
                 title: 'done list',
                 tasks: [
                     {
