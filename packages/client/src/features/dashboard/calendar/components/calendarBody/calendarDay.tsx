@@ -1,9 +1,10 @@
-import { forwardRef, useEffect, useRef, useState } from 'react'
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks'
 import { cn, debounce, getDaysOfWeek } from '@/lib/utils'
 import {
     WEEK_DAYS,
+    addContainer,
     createDayTask,
     markTask,
     setDate,
@@ -83,11 +84,13 @@ export type TaskContainerId = 'todo' | 'progress' | 'done'
 
 const TasksSpaceContainer = () => {
     const [activeId, setActiveId] = useState<string | null>(null)
+
     const date = useAppSelector((state) => state.calendar.date)
     const month = useAppSelector((state) => state.calendar.month)
     const year = useAppSelector((state) => state.calendar.year)
 
     const tasksDate = `${year}-${month}-${date}`
+    console.log(tasksDate)
 
     const dispatch = useAppDispatch()
     const [width, setWidth] = useState(0)
@@ -187,6 +190,7 @@ const TasksContainer = ({
 }: TasksContainerProps) => {
     const portableRef = useRef<HTMLDivElement>(null)
     const { setNodeRef, isOver, active } = useDroppable({ id })
+    const dispatch = useAppDispatch()
 
     const sourceContainerId = active?.data?.current?.container as string
 
@@ -199,14 +203,27 @@ const TasksContainer = ({
         container: id,
         date: tasksDate,
     })
+
+    const handleNewContainer = () => {
+        dispatch(
+            addContainer({
+                date: tasksDate,
+                title: '',
+                prevContainerId: id,
+            })
+        )
+    }
+
     return (
         <div className="w-[25em] shrink-0 flex flex-col gap-y-7 bg-accents-6 px-5 py-[1.125em] border border-[#42434b] rounded-lg ">
             <div className="flex justify-between">
-                <span className="text-xl first-letter:uppercase font-bold">
-                    {title}
-                </span>
-                <span className="border-2 border-white rounded-full p-0.5 grid place-items-center">
-                    <PlusIcon />
+                <ContainerTitle
+                    title={title}
+                    date={tasksDate}
+                    containerId={id}
+                />
+                <span className="border-2 border-white rounded-full p-0.5 grid place-items-center cursor-pointer">
+                    <PlusIcon onClick={handleNewContainer} />
                 </span>
             </div>
 
@@ -239,6 +256,58 @@ const TasksContainer = ({
                 <AddTask container={id} date={tasksDate} title={title} />
             </div>
         </div>
+    )
+}
+
+interface ContainerTitleProps {
+    title: string
+    date: string
+    containerId: string
+}
+
+const DEBOUNCE_MILI_SECONDS = 1000
+
+const ContainerTitle = ({ title: defaultTitle }: ContainerTitleProps) => {
+    const [title, setTitle] = useState(defaultTitle)
+    const titleRef = useRef<HTMLInputElement>(null)
+
+    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+        setTitle(e.target.value)
+
+    const changeTitle = useMemo(
+        () =>
+            debounce((title) => {
+                console.log(title)
+            }, DEBOUNCE_MILI_SECONDS),
+        []
+    )
+
+    useEffect(() => {
+        if (titleRef.current) {
+            titleRef.current.focus()
+        }
+    }, [])
+
+    const handleNoTitle = () => {
+        if (title.trim() === '') {
+            setTitle('no Title !')
+        }
+    }
+
+    useEffect(() => {
+        changeTitle(title)
+    }, [changeTitle, title])
+
+    return (
+        <span className="text-xl first-letter:uppercase font-bold">
+            <input
+                ref={titleRef}
+                className="bg-transparent w-full h-full outline-none placeholder:text-accents-1"
+                value={title}
+                onChange={handleTitleChange}
+                onBlur={handleNoTitle}
+            />
+        </span>
     )
 }
 
