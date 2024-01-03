@@ -3,6 +3,7 @@ import { Task } from '../calendarSlice'
 type Container = {
     // order: number
     title: string
+    createdAt: string
     tasks: Task[]
 }
 
@@ -15,11 +16,12 @@ export type Tasks = Record<
 >
 
 export const tasks: Tasks = {
-    '2023-11-28': {
+    '2024-0-2': {
         containersOrder: ['todo', 'inProgressList', 'doneList'],
         containers: {
             todo: {
                 title: 'to do list',
+                createdAt: '2024-01-02T16:22:32.152Z',
                 tasks: [
                     {
                         id: '1',
@@ -27,7 +29,7 @@ export const tasks: Tasks = {
                         title: 'Embark on the Journey of Knowledge',
                         start: '10:00',
                         end: '20:00',
-                        date: '2023-12-23T17:59:23.819Z',
+                        createdAt: '2024-01-02T16:22:32.152Z',
                         priority: 'low',
                     },
                     {
@@ -36,7 +38,7 @@ export const tasks: Tasks = {
                         title: 'Conquer the Mountain of Challenges',
                         start: '10:00',
                         end: '20:00',
-                        date: '2023-12-23T17:59:23.819Z',
+                        createdAt: '2024-01-02T16:22:32.152Z',
                         priority: 'low',
                     },
                     {
@@ -45,13 +47,14 @@ export const tasks: Tasks = {
                         title: 'Cultivate the Garden of Relationships',
                         start: '10:00',
                         end: '20:00',
-                        date: '2023-12-23T17:59:23.819Z',
+                        createdAt: '2024-01-02T16:22:32.152Z',
                         priority: 'low',
                     },
                 ],
             },
             inProgressList: {
                 title: 'progress list',
+                createdAt: '2024-01-02T16:22:32.152Z',
                 tasks: [
                     {
                         id: '4',
@@ -59,7 +62,7 @@ export const tasks: Tasks = {
                         title: 'Building the Bridge of Understanding',
                         start: '10:00',
                         end: '20:00',
-                        date: '2023-12-23T17:59:23.819Z',
+                        createdAt: '2024-01-02T16:22:32.152Z',
                         priority: 'high',
                     },
                     {
@@ -68,7 +71,7 @@ export const tasks: Tasks = {
                         title: 'Crafting the Magnum Opus of Creativity',
                         start: '10:00',
                         end: '20:00',
-                        date: '2023-12-23T17:59:23.819Z',
+                        createdAt: '2024-01-02T16:22:32.152Z',
                         priority: 'high',
                     },
                     {
@@ -77,13 +80,14 @@ export const tasks: Tasks = {
                         title: 'Nurturing the Flame of Resilience',
                         start: '10:00',
                         end: '20:00',
-                        date: '2023-12-23T17:59:23.819Z',
+                        createdAt: '2024-01-02T16:22:32.152Z',
                         priority: 'high',
                     },
                 ],
             },
             doneList: {
                 title: 'done list',
+                createdAt: '2024-01-02T16:22:32.152Z',
                 tasks: [
                     {
                         id: '7',
@@ -91,7 +95,7 @@ export const tasks: Tasks = {
                         title: 'Master the Art of Time Management',
                         start: '10:00',
                         end: '20:00',
-                        date: '2023-12-23T17:59:23.819Z',
+                        createdAt: '2024-01-02T16:22:32.152Z',
                         priority: 'medium',
                     },
                     {
@@ -100,7 +104,7 @@ export const tasks: Tasks = {
                         title: 'Explore the Uncharted Territory of Knowledge',
                         start: '10:00',
                         end: '20:00',
-                        date: '2023-12-23T17:59:23.819Z',
+                        createdAt: '2024-01-02T16:22:32.152Z',
                         priority: 'medium',
                     },
                     {
@@ -109,7 +113,7 @@ export const tasks: Tasks = {
                         title: 'Cultivate the Habit of Gratitude',
                         start: '10:00',
                         end: '20:00',
-                        date: '2023-12-23T17:59:23.819Z',
+                        createdAt: '2024-01-02T16:22:32.152Z',
                         priority: 'medium',
                     },
                 ],
