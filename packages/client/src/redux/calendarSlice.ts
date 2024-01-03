@@ -19,12 +19,13 @@ export const priorites = ['low', 'medium', 'high'] as const
 
 export type Task = {
     id: string
+    createdAt: string
     userId: string
     title: string
     start: string
     end: string
     // status?: number
-    date: string
+    // date: string
     priority: (typeof priorites)[number]
 }
 
@@ -60,6 +61,12 @@ const changeMonth = (month: number, year: number, increment: number) => {
 export type TaskFormReducerPayload = TaskFormFields & {
     container: string
     date: string
+}
+
+export type CreateContainerPayload = {
+    date: string
+    title: string
+    prevContainerId: string
 }
 
 const changeDate = (
@@ -156,25 +163,42 @@ const calendarSlice = createSlice({
             }
             if (task) containers[targetContainer].tasks.push(task)
         },
-        createDayTask: (state, action: PayloadAction<{ date: string }>) => {
-            const { date } = action.payload
-            state.tasks = {
-                ...state.tasks,
-                [date]: {
-                    containers: {
-                        todo: {
-                            order: 0,
-                            title: 'to do list',
-                            tasks: [],
+        createDayTask: {
+            reducer: (
+                state,
+                action: PayloadAction<{ date: string; createdAt: string }>
+            ) => {
+                const { date, createdAt } = action.payload
+                state.tasks = {
+                    ...state.tasks,
+                    [date]: {
+                        containersOrder: ['todo'],
+                        containers: {
+                            todo: {
+                                title: 'to do list',
+                                createdAt,
+                                tasks: [],
+                            },
                         },
                     },
-                },
-            }
+                }
+            },
+            prepare: (inputs: { date: string }) => {
+                const createdAt = generateTemporaryTime()
+                return {
+                    payload: {
+                        ...inputs,
+                        createdAt,
+                    },
+                }
+            },
         },
         addTask: {
             reducer: (
                 state,
-                action: PayloadAction<TaskFormReducerPayload & { id: string }>
+                action: PayloadAction<
+                    TaskFormReducerPayload & { id: string; createdAt: string }
+                >
             ) => {
                 const container = action.payload.container
                 const taskInput = action.payload
@@ -186,7 +210,8 @@ const calendarSlice = createSlice({
             },
             prepare: (inputs: TaskFormReducerPayload) => {
                 const id = generateTemporaryId()
-                return { payload: { ...inputs, id } }
+                const createdAt = generateTemporaryTime()
+                return { payload: { ...inputs, id, createdAt } }
             },
         },
         deleteTask: (
@@ -227,6 +252,51 @@ const calendarSlice = createSlice({
                 }
             }
         },
+        addContainer: {
+            reducer: (
+                state,
+                action: PayloadAction<
+                    CreateContainerPayload & {
+                        containerId: string
+                        createdAt: string
+                    }
+                >
+            ) => {
+                const { date, title, containerId, createdAt, prevContainerId } =
+                    action.payload
+
+                const tasksField = state.tasks[date]
+                const containers = tasksField.containers
+
+                const prevContainerIndex =
+                    tasksField.containersOrder.indexOf(prevContainerId)
+
+                if (prevContainerIndex !== -1) {
+                    // Use splice to insert "x" after "b"
+                    tasksField.containersOrder.splice(
+                        prevContainerIndex + 1,
+                        0,
+                        containerId
+                    )
+                }
+
+                // tasksField.containersOrder = [
+                //     ...tasksField.containersOrder,
+                //     containerId,
+                // ]
+
+                containers[containerId] = {
+                    title,
+                    createdAt,
+                    tasks: [],
+                }
+            },
+            prepare: (inputs: CreateContainerPayload) => {
+                const containerId = generateTemporaryId()
+                const createdAt = generateTemporaryTime()
+                return { payload: { ...inputs, containerId, createdAt } }
+            },
+        },
     },
 })
 
@@ -234,6 +304,11 @@ function generateTemporaryId() {
     const timestamp = Math.floor(Date.now() / 1000)
     const randomPart = Math.random().toString(36).substring(2, 7)
     return `${timestamp}-${randomPart}`
+}
+
+function generateTemporaryTime() {
+    const date = new Date()
+    return date.toISOString()
 }
 
 export const {
@@ -248,5 +323,6 @@ export const {
     addTask,
     deleteTask,
     editTask,
+    addContainer,
 } = calendarSlice.actions
 export default calendarSlice.reducer
