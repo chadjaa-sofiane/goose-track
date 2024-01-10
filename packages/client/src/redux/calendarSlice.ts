@@ -297,6 +297,18 @@ const calendarSlice = createSlice({
                 return { payload: { ...inputs, containerId, createdAt } }
             },
         },
+        updateContainerTitle: (
+            state,
+            action: PayloadAction<{
+                date: string
+                containerId: string
+                title: string
+            }>
+        ) => {
+            const { date, containerId, title } = action.payload
+            const container = state.tasks[date].containers[containerId]
+            container.title = title
+        },
     },
 })
 
@@ -324,5 +336,6 @@ export const {
     deleteTask,
     editTask,
     addContainer,
+    updateContainerTitle,
 } = calendarSlice.actions
 export default calendarSlice.reducer
