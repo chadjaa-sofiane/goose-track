@@ -141,13 +141,23 @@ export const mapServerErrorsToForm = <
     }
 }
 
-export const debounce = <F extends (...args: unknown[]) => unknown>(
+/**
+ * Debounces a function by delaying its execution until a certain amount of time has passed without any further calls.
+ *
+ * @template F - The type of the debounced function.
+ * @param {F} func - The function to be debounced.
+ * @param {number} delay - The delay in milliseconds before the function is executed.
+ * @returns {(...args: Parameters<F>) => void} - The debounced function.
+ */
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const debounce = <F extends (...args: any[]) => unknown>(
     func: F,
     delay: number
 ) => {
     let timeout: ReturnType<typeof setTimeout> | null = null
 
-    return (...args: unknown[]) => {
+    return (...args: Parameters<F>) => {
         if (timeout) {
             clearTimeout(timeout)
         }
