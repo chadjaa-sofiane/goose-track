@@ -2,6 +2,7 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 import dayjs from 'dayjs'
 import { Tasks, tasks } from './data/tasks'
 import { TaskFormFields } from '@/api/calendarApi'
+import { arrayMove } from '@dnd-kit/sortable'
 
 export const DISPLAY = ['month', 'day'] as const
 export type Display = (typeof DISPLAY)[number]
@@ -280,11 +281,6 @@ const calendarSlice = createSlice({
                     )
                 }
 
-                // tasksField.containersOrder = [
-                //     ...tasksField.containersOrder,
-                //     containerId,
-                // ]
-
                 containers[containerId] = {
                     title,
                     createdAt,
@@ -308,6 +304,21 @@ const calendarSlice = createSlice({
             const { date, containerId, title } = action.payload
             const container = state.tasks[date].containers[containerId]
             container.title = title
+        },
+        reOrderContainers: (
+            state,
+            action: PayloadAction<{
+                date: string
+                oldIndex: number
+                newIndex: number
+            }>
+        ) => {
+            const { date, oldIndex, newIndex } = action.payload
+            state.tasks[date].containersOrder = arrayMove(
+                state.tasks[date].containersOrder,
+                newIndex,
+                oldIndex
+            )
         },
     },
 })
@@ -337,5 +348,6 @@ export const {
     editTask,
     addContainer,
     updateContainerTitle,
+    reOrderContainers,
 } = calendarSlice.actions
 export default calendarSlice.reducer
