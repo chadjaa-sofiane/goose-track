@@ -7,7 +7,9 @@ import {
     addContainer,
     createDayTask,
     markTask,
+    reOrderContainers,
     setDate,
+    updateContainerTitle,
 } from '@/redux/calendarSlice'
 import PlusIcon from '@/assets/plus.svg?react'
 import { motion } from 'framer-motion'
@@ -20,18 +22,31 @@ import {
     useDroppable,
     DragOverlay,
     DraggableAttributes,
+    closestCenter,
 } from '@dnd-kit/core'
 import { Task } from '@/redux/calendarSlice'
 import { AddTask, UseEditTask } from './TaskForm'
 import CircleArrowIcon from '@/features/dashboard/assets/circle-arrow.svg?react'
+import DraggableIcon from '@/features/dashboard/assets/draggable.svg?react'
 import TrashIcon from '@/features/dashboard/assets/trash.svg?react'
 import PencilIcon from '@/features/dashboard/assets/pencil.svg?react'
 import { type SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities'
 import { UseDeleteTask } from './deleteTask'
+import {
+    SortableContext,
+    horizontalListSortingStrategy,
+    useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+
+const DRAG_TYPES = {
+    TASK: 'drag_task',
+    CONTAINER: 'sort_container',
+} as const
 
 const CalendarDay = () => {
     return (
-        <div className="w-full flex-1 flex flex-col gap-y-4">
+        <div className="w-full flex-1 flex flex-col gap-y-4 overflow-clip">
             <WeekDaysField />
             <TasksSpaceContainer />
         </div>
@@ -90,13 +105,13 @@ const TasksSpaceContainer = () => {
     const year = useAppSelector((state) => state.calendar.year)
 
     const tasksDate = `${year}-${month}-${date}`
-    console.log(tasksDate)
 
     const dispatch = useAppDispatch()
-    const [width, setWidth] = useState(0)
+
     const ref = useRef<HTMLDivElement>(null)
 
     const tasks = useAppSelector((state) => state.calendar.tasks[tasksDate])
+    console.log(tasks?.containersOrder)
 
     useEffect(() => {
         if (!tasks) {
@@ -104,31 +119,16 @@ const TasksSpaceContainer = () => {
         }
     }, [tasks, tasksDate, dispatch])
 
-    useEffect(() => {
-        const updateWidth = debounce(() => {
-            const scrollWidth = ref?.current?.scrollWidth || 0
-            const offsetWidth = ref?.current?.offsetWidth || 0
-            setWidth(scrollWidth - offsetWidth)
-        }, 500)
-
-        if (ref.current) {
-            updateWidth()
-            window.addEventListener('resize', updateWidth)
-        }
-        () => window.removeEventListener('resize', updateWidth)
-    }, [ref, width])
-
     function handleDragStart(event: DragStartEvent) {
         const id = event.active.id as string
         setActiveId(id)
     }
 
-    const handleDragEnd = (event: DragEndEvent) => {
-        const id = event.active.id as string
-        const targetContainer = event?.over?.id as string
-        const sourceContainer = event?.active?.data?.current
-            ?.container as string
-
+    const dragTaskHandler = (event: DragEndEvent) => {
+        const { active, over } = event
+        const id = active.id as string
+        const targetContainer = over?.id as string
+        const sourceContainer = active?.data?.current?.container as string
         if (targetContainer && sourceContainer !== targetContainer) {
             dispatch(
                 markTask({
@@ -138,38 +138,71 @@ const TasksSpaceContainer = () => {
                 })
             )
         }
+    }
+
+    const swapContainerHandler = (event: DragEndEvent) => {
+        const { active, over } = event
+        const oldIndex = tasks?.containersOrder.findIndex(
+            (containerId) => containerId === active.id
+        )
+        const newIndex = tasks?.containersOrder.findIndex(
+            (containerId) => containerId === over?.id
+        )
+        dispatch(reOrderContainers({ date: tasksDate, oldIndex, newIndex }))
+    }
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const dragType = event?.active?.data?.current
+            ?.type as (typeof DRAG_TYPES)[keyof typeof DRAG_TYPES]
+
+        switch (dragType) {
+            case DRAG_TYPES.TASK:
+                dragTaskHandler(event)
+                break
+            case DRAG_TYPES.CONTAINER:
+                swapContainerHandler(event)
+                break
+        }
 
         setActiveId(null)
     }
 
     return (
-        <div className="flex-1 flex flex-col w-[100%] overflow-clip px-4 ">
+        <motion.div
+            ref={ref}
+            className="w-fit max-w-full h-full flex-1 flex flex-col  px-4"
+        >
             <motion.div
-                ref={ref}
                 drag="x"
-                dragConstraints={{ right: 0, left: -width }}
-                className="flex flex-1 py-4 gap-x-8"
+                // dragConstraints={{ right: 0, left: 0 }}
+                dragConstraints={ref}
+                // onMeasureDragConstraints={ref}
+                className="flex flex-1 py-4 gap-x-8 w-fit"
             >
                 <DndContext
                     onDragStart={handleDragStart}
                     onDragEnd={handleDragEnd}
+                    collisionDetection={closestCenter}
                 >
-                    {tasks?.containers &&
-                        Object.entries(tasks?.containers)?.map(
-                            ([name, container]) => (
+                    <SortableContext
+                        items={tasks?.containersOrder || []}
+                        strategy={horizontalListSortingStrategy}
+                    >
+                        {tasks?.containers &&
+                            tasks?.containersOrder?.map((containerId) => (
                                 <TasksContainer
-                                    key={name}
-                                    id={name}
+                                    key={containerId}
+                                    id={containerId}
                                     activeId={activeId}
-                                    title={container.title}
-                                    tasks={container.tasks}
+                                    title={tasks?.containers[containerId].title}
+                                    tasks={tasks?.containers[containerId].tasks}
                                     tasksDate={tasksDate}
                                 />
-                            )
-                        )}
+                            ))}
+                    </SortableContext>
                 </DndContext>
             </motion.div>
-        </div>
+        </motion.div>
     )
 }
 
@@ -189,11 +222,27 @@ const TasksContainer = ({
     tasksDate,
 }: TasksContainerProps) => {
     const portableRef = useRef<HTMLDivElement>(null)
+    const {
+        setNodeRef: sortableRef,
+        listeners,
+        attributes,
+        transform,
+        transition,
+        active: sortableActive,
+    } = useSortable({
+        id,
+        data: {
+            type: DRAG_TYPES.CONTAINER,
+        },
+    })
+
+    const isSorted = sortableActive?.id === id
+
     const { setNodeRef, isOver, active } = useDroppable({ id })
     const dispatch = useAppDispatch()
 
     const sourceContainerId = active?.data?.current?.container as string
-
+    const shouldMarkTask = sourceContainerId !== id && isOver && activeId
     const { EditTask, openEditTask } = UseEditTask({
         container: id,
         date: tasksDate,
@@ -204,6 +253,11 @@ const TasksContainer = ({
         date: tasksDate,
     })
 
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    }
+
     const handleNewContainer = () => {
         dispatch(
             addContainer({
@@ -213,10 +267,35 @@ const TasksContainer = ({
             })
         )
     }
-
     return (
-        <div className="w-[25em] shrink-0 flex flex-col gap-y-7 bg-accents-6 px-5 py-[1.125em] border border-[#42434b] rounded-lg ">
+        <div
+            ref={sortableRef}
+            style={style}
+            {...attributes}
+            className={cn(
+                'w-[25em] shrink-0 flex flex-col gap-y-7 bg-accents-6 px-5 py-[1.125em] border border-[#42434b] rounded-lg',
+                {
+                    'border border-accents-1': shouldMarkTask,
+                    'bg-accents-1 bg-opacity-25 scale-[1.01] duration-200 transition-transform':
+                        isSorted,
+                }
+            )}
+        >
             <div className="flex justify-between">
+                <span
+                    {...listeners}
+                    onPointerDownCapture={(e) => {
+                        e.stopPropagation()
+
+                        if (listeners) {
+                            listeners['onPointerDown'](e)
+                            listeners['onKeyDown'](e)
+                        }
+                    }}
+                    className="grid place-items-center cursor-pointer hover:scale-105"
+                >
+                    <DraggableIcon className="fill-text" />
+                </span>
                 <ContainerTitle
                     title={title}
                     date={tasksDate}
@@ -227,11 +306,13 @@ const TasksContainer = ({
                 </span>
             </div>
 
-            {activeId && (
-                <DragOverlay>
-                    <PortableElement ref={portableRef} />
-                </DragOverlay>
-            )}
+            {activeId &&
+                createPortal(
+                    <DragOverlay className="fixed">
+                        <PortableElement ref={portableRef} />
+                    </DragOverlay>,
+                    document.body
+                )}
 
             <ul ref={setNodeRef} className="flex-1 flex flex-col gap-y-8">
                 {tasks.map((task) => (
@@ -246,9 +327,7 @@ const TasksContainer = ({
                         openDeleteTask={openDeleteTask}
                     />
                 ))}
-                {sourceContainerId !== id && isOver && activeId && (
-                    <ListPreview />
-                )}
+                {shouldMarkTask && <ListPreview />}
             </ul>
             <EditTask />
             <DeleteTask />
@@ -267,19 +346,23 @@ interface ContainerTitleProps {
 
 const DEBOUNCE_MILI_SECONDS = 1000
 
-const ContainerTitle = ({ title: defaultTitle }: ContainerTitleProps) => {
+const ContainerTitle = ({
+    title: defaultTitle,
+    date,
+    containerId,
+}: ContainerTitleProps) => {
     const [title, setTitle] = useState(defaultTitle)
     const titleRef = useRef<HTMLInputElement>(null)
-
+    const dispatch = useAppDispatch()
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
         setTitle(e.target.value)
 
-    const changeTitle = useMemo(
+    const updateTitle = useMemo(
         () =>
-            debounce((title) => {
-                console.log(title)
+            debounce((title: string) => {
+                dispatch(updateContainerTitle({ date, containerId, title }))
             }, DEBOUNCE_MILI_SECONDS),
-        []
+        [containerId, date, dispatch]
     )
 
     useEffect(() => {
@@ -295,11 +378,11 @@ const ContainerTitle = ({ title: defaultTitle }: ContainerTitleProps) => {
     }
 
     useEffect(() => {
-        changeTitle(title)
-    }, [changeTitle, title])
+        updateTitle(title)
+    }, [updateTitle, title])
 
     return (
-        <span className="text-xl first-letter:uppercase font-bold">
+        <span className="relative text-xl first-letter:uppercase font-bold">
             <input
                 ref={titleRef}
                 className="bg-transparent w-full h-full outline-none placeholder:text-accents-1"
@@ -333,6 +416,7 @@ const Draggable = ({
         id,
         data: {
             container,
+            type: DRAG_TYPES.TASK,
         },
     })
 
@@ -370,22 +454,25 @@ const Task = ({
     return (
         <motion.div
             // onHoverStart={{  }}
-            className="flex flex-col gap-y-8 p-3.5 bg-bg border border-[#42434b] rounded-md"
+            className="flex flex-col gap-y-8 p-3.5 text-text bg-bg border border-[#42434b] rounded-md"
         >
             <div
                 {...listeners}
                 {...attributes}
                 onPointerDownCapture={(e) => {
                     e.stopPropagation()
-                    console.log(listeners)
 
                     if (listeners) {
                         listeners['onPointerDown'](e)
                         listeners['onKeyDown'](e)
                     }
                 }}
+                className="flex items-center gap-3"
             >
-                <p> {task.title} </p>
+                <span>
+                    <DraggableIcon className="fill-white" />
+                </span>
+                <p className="align-top"> {task.title} </p>
             </div>
             <div className="flex justify-between items-center">
                 <div className="flex gap-x-2">

@@ -16,7 +16,7 @@ export type Tasks = Record<
 >
 
 export const tasks: Tasks = {
-    '2024-0-2': {
+    '2024-0-8': {
         containersOrder: ['todo', 'inProgressList', 'doneList'],
         containers: {
             todo: {
