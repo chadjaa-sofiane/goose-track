@@ -2,6 +2,7 @@ import { Task } from '../calendarSlice'
 
 type Container = {
     // order: number
+    id: string
     title: string
     createdAt: string
     tasks: Task[]
@@ -11,15 +12,16 @@ export type Tasks = Record<
     string,
     {
         containersOrder: string[]
-        containers: Record<string, Container>
+        containers: Container[]
     }
 >
 
 export const tasks: Tasks = {
     '2024-0-8': {
         containersOrder: ['todo', 'inProgressList', 'doneList'],
-        containers: {
-            todo: {
+        containers: [
+            {
+                id: 'f3bde478-8c91-4da3-9bae-7269063c1b8d',
                 title: 'to do list',
                 createdAt: '2024-01-02T16:22:32.152Z',
                 tasks: [
@@ -52,7 +54,8 @@ export const tasks: Tasks = {
                     },
                 ],
             },
-            inProgressList: {
+            {
+                id: 'a0b3e7cf-2d95-4f06-bfc1-8c65a98d7e9a',
                 title: 'progress list',
                 createdAt: '2024-01-02T16:22:32.152Z',
                 tasks: [
@@ -85,7 +88,8 @@ export const tasks: Tasks = {
                     },
                 ],
             },
-            doneList: {
+            {
+                id: '6f847258-93b2-4ec9-81fb-57111d0a1f27',
                 title: 'done list',
                 createdAt: '2024-01-02T16:22:32.152Z',
                 tasks: [
@@ -118,6 +122,6 @@ export const tasks: Tasks = {
                     },
                 ],
             },
-        },
+        ],
     },
 }
