@@ -147,49 +147,58 @@ const calendarSlice = createSlice({
                 id: string
             }>
         ) => {
-            const { container: targetContainer, date, id } = action.payload
+            const { container: targetContainerId, date, id } = action.payload
             const containers = state.tasks[date].containers
-            let task: Task | undefined
-            for (const containerKey in containers) {
-                if (containerKey !== targetContainer) {
-                    const container = containers[containerKey]
-                    task = container.tasks.find((task) => task.id === id)
+            const targetContainer = containers.find(
+                (c) => c.id === targetContainerId
+            )
+            if (!targetContainer) return
+            for (const container of containers) {
+                if (container.id !== targetContainerId) {
+                    const task = container.tasks.find((task) => task.id === id)
                     if (task) {
+                        targetContainer.tasks = [...targetContainer.tasks, task]
                         container.tasks = container.tasks.filter(
-                            (task) => task.id !== id
+                            (t) => t.id !== task.id
                         )
                         break
                     }
                 }
             }
-            if (task) containers[targetContainer].tasks.push(task)
         },
         createDayTask: {
             reducer: (
                 state,
-                action: PayloadAction<{ date: string; createdAt: string }>
+                action: PayloadAction<{
+                    date: string
+                    createdAt: string
+                    id: string
+                }>
             ) => {
-                const { date, createdAt } = action.payload
+                const { date, createdAt, id } = action.payload
                 state.tasks = {
                     ...state.tasks,
                     [date]: {
                         containersOrder: ['todo'],
-                        containers: {
-                            todo: {
+                        containers: [
+                            {
+                                id,
                                 title: 'to do list',
                                 createdAt,
                                 tasks: [],
                             },
-                        },
+                        ],
                     },
                 }
             },
             prepare: (inputs: { date: string }) => {
                 const createdAt = generateTemporaryTime()
+                const id = generateTemporaryId()
                 return {
                     payload: {
                         ...inputs,
                         createdAt,
+                        id,
                     },
                 }
             },
@@ -201,13 +210,26 @@ const calendarSlice = createSlice({
                     TaskFormReducerPayload & { id: string; createdAt: string }
                 >
             ) => {
-                const container = action.payload.container
-                const taskInput = action.payload
-                const date = action.payload.date
-                state.tasks[date].containers[container].tasks.push({
-                    ...taskInput,
-                    userId: 'sometihng',
-                })
+                const {
+                    container: containerId,
+                    date,
+                    ...taskInputs
+                } = action.payload
+                state.tasks[date].containers = state.tasks[date].containers.map(
+                    (container) =>
+                        container.id === containerId
+                            ? {
+                                  ...container,
+                                  tasks: [
+                                      ...container.tasks,
+                                      {
+                                          userId: 'something something',
+                                          ...taskInputs,
+                                      },
+                                  ],
+                              }
+                            : container
+                )
             },
             prepare: (inputs: TaskFormReducerPayload) => {
                 const id = generateTemporaryId()
@@ -223,11 +245,19 @@ const calendarSlice = createSlice({
                 taskId: string
             }>
         ) => {
-            const { date, container: targetContainer, taskId } = action.payload
-            const container = state.tasks[date].containers[targetContainer]
-            container.tasks = container.tasks.filter(
-                (task) => task.id !== taskId
+            const {
+                date,
+                container: targetContainerId,
+                taskId,
+            } = action.payload
+            const container = state.tasks[date].containers.find(
+                (c) => c.id === targetContainerId
             )
+            if (container) {
+                container.tasks = container?.tasks.filter(
+                    (task) => task.id !== taskId
+                )
+            }
         },
 
         editTask: (
@@ -235,12 +265,14 @@ const calendarSlice = createSlice({
             action: PayloadAction<TaskFormReducerPayload & { taskId: string }>
         ) => {
             const {
-                container: targetContainer,
+                container: targetContainerId,
                 date,
                 taskId,
                 ...updatedTask
             } = action.payload
-            const container = state.tasks[date]?.containers[targetContainer]
+            const container = state.tasks[date].containers.find(
+                (c) => c.id === targetContainerId
+            )
             if (!container) return
             const taskIndex = container?.tasks.findIndex(
                 (task) => task.id === taskId
@@ -266,25 +298,26 @@ const calendarSlice = createSlice({
                 const { date, title, containerId, createdAt, prevContainerId } =
                     action.payload
 
-                const tasksField = state.tasks[date]
-                const containers = tasksField.containers
+                const containers = state.tasks[date].containers
 
-                const prevContainerIndex =
-                    tasksField.containersOrder.indexOf(prevContainerId)
+                const prevContainerIndex = containers.findIndex(
+                    (c) => c.id === prevContainerId
+                )
 
-                if (prevContainerIndex !== -1) {
-                    // Use splice to insert "x" after "b"
-                    tasksField.containersOrder.splice(
-                        prevContainerIndex + 1,
-                        0,
-                        containerId
-                    )
-                }
-
-                containers[containerId] = {
+                const newContainer = {
+                    id: containerId,
                     title,
                     createdAt,
                     tasks: [],
+                }
+
+                if (prevContainerIndex !== -1) {
+                    // it was writting way to kepp the mutability concept of redux.
+                    state.tasks[date].containers = [
+                        ...containers.slice(0, prevContainerIndex),
+                        newContainer,
+                        ...containers.slice(prevContainerIndex),
+                    ]
                 }
             },
             prepare: (inputs: CreateContainerPayload) => {
@@ -302,8 +335,17 @@ const calendarSlice = createSlice({
             }>
         ) => {
             const { date, containerId, title } = action.payload
-            const container = state.tasks[date].containers[containerId]
-            container.title = title
+            const targetContainer = state.tasks[date].containers.find(
+                (c) => c.id === containerId
+            )
+            state.tasks[date].containers.map((c) =>
+                c.id === targetContainer?.id
+                    ? {
+                          ...c,
+                          title,
+                      }
+                    : c
+            )
         },
         reOrderContainers: (
             state,
@@ -314,8 +356,8 @@ const calendarSlice = createSlice({
             }>
         ) => {
             const { date, oldIndex, newIndex } = action.payload
-            state.tasks[date].containersOrder = arrayMove(
-                state.tasks[date].containersOrder,
+            state.tasks[date].containers = arrayMove(
+                state.tasks[date].containers,
                 newIndex,
                 oldIndex
             )

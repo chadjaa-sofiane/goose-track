@@ -184,10 +184,7 @@ const TasksSpaceContainer = () => {
                     onDragEnd={handleDragEnd}
                     collisionDetection={closestCenter}
                 >
-                    <SortableContext
-                        items={tasks?.containersOrder || []}
-                        strategy={horizontalListSortingStrategy}
-                    >
+                    <SortableContext strategy={horizontalListSortingStrategy}>
                         {tasks?.containers &&
                             tasks?.containersOrder?.map((containerId) => (
                                 <TasksContainer
