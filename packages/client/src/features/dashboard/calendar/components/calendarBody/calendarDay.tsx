@@ -111,7 +111,6 @@ const TasksSpaceContainer = () => {
     const ref = useRef<HTMLDivElement>(null)
 
     const tasks = useAppSelector((state) => state.calendar.tasks[tasksDate])
-    console.log(tasks?.containersOrder)
 
     useEffect(() => {
         if (!tasks) {
@@ -142,11 +141,11 @@ const TasksSpaceContainer = () => {
 
     const swapContainerHandler = (event: DragEndEvent) => {
         const { active, over } = event
-        const oldIndex = tasks?.containersOrder.findIndex(
-            (containerId) => containerId === active.id
+        const oldIndex = tasks?.containers.findIndex(
+            (container) => container.id === active.id
         )
-        const newIndex = tasks?.containersOrder.findIndex(
-            (containerId) => containerId === over?.id
+        const newIndex = tasks?.containers.findIndex(
+            (container) => container.id === over?.id
         )
         dispatch(reOrderContainers({ date: tasksDate, oldIndex, newIndex }))
     }
@@ -185,17 +184,17 @@ const TasksSpaceContainer = () => {
                     collisionDetection={closestCenter}
                 >
                     <SortableContext strategy={horizontalListSortingStrategy}>
-                        {tasks?.containers &&
-                            tasks?.containersOrder?.map((containerId) => (
-                                <TasksContainer
-                                    key={containerId}
-                                    id={containerId}
-                                    activeId={activeId}
-                                    title={tasks?.containers[containerId].title}
-                                    tasks={tasks?.containers[containerId].tasks}
-                                    tasksDate={tasksDate}
-                                />
-                            ))}
+                        items={tasks?.containers || []}
+                        {tasks?.containers.map(({ id, title, tasks }) => (
+                            <TasksContainer
+                                key={id}
+                                id={id}
+                                activeId={activeId}
+                                title={title}
+                                tasks={tasks}
+                                tasksDate={tasksDate}
+                            />
+                        ))}
                     </SortableContext>
                 </DndContext>
             </motion.div>
