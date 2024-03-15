@@ -69,7 +69,7 @@ const WeekDaysField = () => {
 
     return (
         <div className="sticky grid grid-cols-7 bg-accents-6  rounded-lg border-2 border-[#42434b]">
-            {getDaysOfWeek(year, month, date).map((weekDate, index) => (
+            {getDaysOfWeek(year, month, date)?.map((weekDate, index) => (
                 <div
                     className={cn(
                         'flex flex-col items-center cursor-pointer rounded-lg py-3.5',
@@ -165,6 +165,7 @@ const TasksSpaceContainer = () => {
 
         setActiveId(null)
     }
+    if (!tasks) return null
 
     return (
         <motion.div
@@ -183,9 +184,11 @@ const TasksSpaceContainer = () => {
                     onDragEnd={handleDragEnd}
                     collisionDetection={closestCenter}
                 >
-                    <SortableContext strategy={horizontalListSortingStrategy}>
-                        items={tasks?.containers || []}
-                        {tasks?.containers.map(({ id, title, tasks }) => (
+                    <SortableContext
+                        strategy={horizontalListSortingStrategy}
+                        items={tasks?.containers}
+                    >
+                        {tasks?.containers?.map(({ id, title, tasks }) => (
                             <TasksContainer
                                 key={id}
                                 id={id}
@@ -311,7 +314,7 @@ const TasksContainer = ({
                 )}
 
             <ul ref={setNodeRef} className="flex-1 flex flex-col gap-y-8">
-                {tasks.map((task) => (
+                {tasks?.map((task) => (
                     <Draggable
                         key={task.id}
                         id={task.id}
