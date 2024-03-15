@@ -312,11 +312,10 @@ const calendarSlice = createSlice({
                 }
 
                 if (prevContainerIndex !== -1) {
-                    // it was writting way to kepp the mutability concept of redux.
                     state.tasks[date].containers = [
-                        ...containers.slice(0, prevContainerIndex),
+                        ...containers.slice(0, prevContainerIndex + 1),
                         newContainer,
-                        ...containers.slice(prevContainerIndex),
+                        ...containers.slice(prevContainerIndex + 1),
                     ]
                 }
             },
