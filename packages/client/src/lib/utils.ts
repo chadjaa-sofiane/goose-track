@@ -39,13 +39,13 @@ export const getDaysOfMonth = (
     for (let i = 0; i < firstDateOfMonth.day(); i++) {
         daysOfMonth.push(firstDateOfMonth.day(i))
     }
-    for (let i = firstDateOfMonth.date(); i <= lastDateOfMonth.date(); i++) {
+    for (let i = firstDateOfMonth.date(); i < lastDateOfMonth.date(); i++) {
         daysOfMonth.push(firstDateOfMonth.date(i))
     }
 
     for (
         let i = lastDateOfMonth.day();
-        i < lastDateOfMonth.endOf('week').day();
+        i <= lastDateOfMonth.endOf('week').day();
         i++
     ) {
         daysOfMonth.push(lastDateOfMonth.day(i))
