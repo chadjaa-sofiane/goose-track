@@ -155,6 +155,7 @@ const calendarSlice = createSlice({
             const { container: targetContainerId, date, id } = action.payload
             const containers =
                 state.containers[date.year][date.month][date.date]
+
             const targetContainer = containers.find(
                 (c) => c.id === targetContainerId
             )
@@ -172,7 +173,7 @@ const calendarSlice = createSlice({
                 }
             }
         },
-        createDayTask: {
+        createEmptyContainer: {
             reducer: (
                 state,
                 action: PayloadAction<{
@@ -182,10 +183,13 @@ const calendarSlice = createSlice({
                 }>
             ) => {
                 const { date, createdAt, id } = action.payload
+
                 state.containers = {
                     ...state.containers,
                     [date.year]: {
+                        ...(state.containers[date.year] || {}),
                         [date.month]: {
+                            ...(state.containers[date.year][date.month] || {}),
                             [date.date]: [
                                 {
                                     id,
@@ -397,7 +401,7 @@ export const {
     prevWeek,
     setDate,
     markTask,
-    createDayTask,
+    createEmptyContainer,
     addTask,
     deleteTask,
     editTask,

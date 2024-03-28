@@ -6,7 +6,7 @@ import {
     TasksDate,
     WEEK_DAYS,
     addContainer,
-    createDayTask,
+    createEmptyContainer,
     markTask,
     reOrderContainers,
     setDate,
@@ -121,13 +121,12 @@ const TasksSpaceContainer = () => {
     const containers = useAppSelector(
         (state) => state.calendar.containers[year][month][date]
     )
-    console.log(containers)
 
     useEffect(() => {
         if (!containers) {
-            dispatch(createDayTask({ date: tasksDate }))
+            dispatch(createEmptyContainer({ date: tasksDate }))
         }
-    }, [containers, tasksDate, dispatch])
+    }, [containers, dispatch, tasksDate])
 
     function handleDragStart(event: DragStartEvent) {
         const id = event.active.id as string
