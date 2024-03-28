@@ -9,6 +9,7 @@ import { useAppDispatch } from '@/hooks/reduxHooks'
 import {
     Task,
     TaskFormReducerPayload,
+    TasksDate,
     addTask,
     editTask,
     priorites,
@@ -19,7 +20,7 @@ import PlusIcon from '@/assets/plus.svg?react'
 
 interface TaskFormProps {
     container: string
-    date: string
+    date: TasksDate
     title: string
     onSubmit: (
         inputs: TaskFormReducerPayload,

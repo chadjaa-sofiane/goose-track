@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks'
 import { cn, debounce, getDaysOfWeek } from '@/lib/utils'
 import {
+    TasksDate,
     WEEK_DAYS,
     addContainer,
     createDayTask,
@@ -104,19 +105,29 @@ const TasksSpaceContainer = () => {
     const month = useAppSelector((state) => state.calendar.month)
     const year = useAppSelector((state) => state.calendar.year)
 
-    const tasksDate = `${year}-${month}-${date}`
+    const tasksDate = useMemo(
+        () => ({
+            year,
+            month,
+            date,
+        }),
+        [year, month, date]
+    )
 
     const dispatch = useAppDispatch()
 
     const ref = useRef<HTMLDivElement>(null)
 
-    const tasks = useAppSelector((state) => state.calendar.tasks[tasksDate])
+    const containers = useAppSelector(
+        (state) => state.calendar.containers[year][month][date]
+    )
+    console.log(containers)
 
     useEffect(() => {
-        if (!tasks) {
+        if (!containers) {
             dispatch(createDayTask({ date: tasksDate }))
         }
-    }, [tasks, tasksDate, dispatch])
+    }, [containers, tasksDate, dispatch])
 
     function handleDragStart(event: DragStartEvent) {
         const id = event.active.id as string
@@ -141,10 +152,10 @@ const TasksSpaceContainer = () => {
 
     const swapContainerHandler = (event: DragEndEvent) => {
         const { active, over } = event
-        const oldIndex = tasks?.containers.findIndex(
+        const oldIndex = containers.findIndex(
             (container) => container.id === active.id
         )
-        const newIndex = tasks?.containers.findIndex(
+        const newIndex = containers.findIndex(
             (container) => container.id === over?.id
         )
         dispatch(reOrderContainers({ date: tasksDate, oldIndex, newIndex }))
@@ -165,7 +176,7 @@ const TasksSpaceContainer = () => {
 
         setActiveId(null)
     }
-    if (!tasks) return null
+    if (!containers) return null
 
     return (
         <motion.div
@@ -186,9 +197,9 @@ const TasksSpaceContainer = () => {
                 >
                     <SortableContext
                         strategy={horizontalListSortingStrategy}
-                        items={tasks?.containers}
+                        items={containers}
                     >
-                        {tasks?.containers?.map(({ id, title, tasks }) => (
+                        {containers?.map(({ id, title, tasks }) => (
                             <TasksContainer
                                 key={id}
                                 id={id}
@@ -210,7 +221,7 @@ interface TasksContainerProps {
     tasks: Task[]
     activeId: string | null
     id: string
-    tasksDate: string
+    tasksDate: TasksDate
 }
 
 const TasksContainer = ({
@@ -339,7 +350,7 @@ const TasksContainer = ({
 
 interface ContainerTitleProps {
     title: string
-    date: string
+    date: TasksDate
     containerId: string
 }
 

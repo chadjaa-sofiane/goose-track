@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 import dayjs from 'dayjs'
-import { Tasks, tasks } from './data/tasks'
+import { containers, Containers } from './data/tasks'
 import { TaskFormFields } from '@/api/calendarApi'
 import { arrayMove } from '@dnd-kit/sortable'
 
@@ -17,6 +17,12 @@ export const WEEK_DAYS = [
 ] as const
 
 export const priorites = ['low', 'medium', 'high'] as const
+
+export type TasksDate = {
+    year: number
+    month: number
+    date: number
+}
 
 export type Task = {
     id: string
@@ -37,7 +43,7 @@ interface CalendarState {
     currentMonth: number
     currentYear: number
     display: Display
-    tasks: Tasks
+    containers: Containers
 }
 
 const initialState: CalendarState = {
@@ -47,8 +53,7 @@ const initialState: CalendarState = {
     currentMonth: dayjs().month(),
     currentYear: dayjs().year(),
     display: 'month',
-    tasks,
-    // tasks: tasks
+    containers,
 }
 
 const changeMonth = (month: number, year: number, increment: number) => {
@@ -61,11 +66,11 @@ const changeMonth = (month: number, year: number, increment: number) => {
 
 export type TaskFormReducerPayload = TaskFormFields & {
     container: string
-    date: string
+    date: TasksDate
 }
 
 export type CreateContainerPayload = {
-    date: string
+    date: TasksDate
     title: string
     prevContainerId: string
 }
@@ -142,13 +147,14 @@ const calendarSlice = createSlice({
         markTask: (
             state,
             action: PayloadAction<{
-                date: string
+                date: TasksDate
                 container: string
                 id: string
             }>
         ) => {
             const { container: targetContainerId, date, id } = action.payload
-            const containers = state.tasks[date].containers
+            const containers =
+                state.containers[date.year][date.month][date.date]
             const targetContainer = containers.find(
                 (c) => c.id === targetContainerId
             )
@@ -170,28 +176,29 @@ const calendarSlice = createSlice({
             reducer: (
                 state,
                 action: PayloadAction<{
-                    date: string
+                    date: TasksDate
                     createdAt: string
                     id: string
                 }>
             ) => {
                 const { date, createdAt, id } = action.payload
-                state.tasks = {
-                    ...state.tasks,
-                    [date]: {
-                        containersOrder: ['todo'],
-                        containers: [
-                            {
-                                id,
-                                title: 'to do list',
-                                createdAt,
-                                tasks: [],
-                            },
-                        ],
+                state.containers = {
+                    ...state.containers,
+                    [date.year]: {
+                        [date.month]: {
+                            [date.date]: [
+                                {
+                                    id,
+                                    title: 'to do list',
+                                    createdAt,
+                                    tasks: [],
+                                },
+                            ],
+                        },
                     },
                 }
             },
-            prepare: (inputs: { date: string }) => {
+            prepare: (inputs: { date: TasksDate }) => {
                 const createdAt = generateTemporaryTime()
                 const id = generateTemporaryId()
                 return {
@@ -215,8 +222,12 @@ const calendarSlice = createSlice({
                     date,
                     ...taskInputs
                 } = action.payload
-                state.tasks[date].containers = state.tasks[date].containers.map(
-                    (container) =>
+
+                const containers =
+                    state.containers[date.year][date.month][date.date]
+
+                state.containers[date.year][date.month][date.date] =
+                    containers.map((container) =>
                         container.id === containerId
                             ? {
                                   ...container,
@@ -229,7 +240,7 @@ const calendarSlice = createSlice({
                                   ],
                               }
                             : container
-                )
+                    )
             },
             prepare: (inputs: TaskFormReducerPayload) => {
                 const id = generateTemporaryId()
@@ -240,7 +251,7 @@ const calendarSlice = createSlice({
         deleteTask: (
             state,
             action: PayloadAction<{
-                date: string
+                date: TasksDate
                 container: string
                 taskId: string
             }>
@@ -250,9 +261,9 @@ const calendarSlice = createSlice({
                 container: targetContainerId,
                 taskId,
             } = action.payload
-            const container = state.tasks[date].containers.find(
-                (c) => c.id === targetContainerId
-            )
+            const container = state.containers[date.year][date.month][
+                date.date
+            ].find((c) => c.id === targetContainerId)
             if (container) {
                 container.tasks = container?.tasks.filter(
                     (task) => task.id !== taskId
@@ -261,7 +272,7 @@ const calendarSlice = createSlice({
         },
 
         editTask: (
-            state,
+            _,
             action: PayloadAction<TaskFormReducerPayload & { taskId: string }>
         ) => {
             const {
@@ -270,7 +281,7 @@ const calendarSlice = createSlice({
                 taskId,
                 ...updatedTask
             } = action.payload
-            const container = state.tasks[date].containers.find(
+            const container = containers[date.year][date.month][date.date].find(
                 (c) => c.id === targetContainerId
             )
             if (!container) return
@@ -298,7 +309,8 @@ const calendarSlice = createSlice({
                 const { date, title, containerId, createdAt, prevContainerId } =
                     action.payload
 
-                const containers = state.tasks[date].containers
+                const containers =
+                    state.containers[date.year][date.month][date.date]
 
                 const prevContainerIndex = containers.findIndex(
                     (c) => c.id === prevContainerId
@@ -312,7 +324,7 @@ const calendarSlice = createSlice({
                 }
 
                 if (prevContainerIndex !== -1) {
-                    state.tasks[date].containers = [
+                    state.containers[date.year][date.month][date.date] = [
                         ...containers.slice(0, prevContainerIndex + 1),
                         newContainer,
                         ...containers.slice(prevContainerIndex + 1),
@@ -328,16 +340,16 @@ const calendarSlice = createSlice({
         updateContainerTitle: (
             state,
             action: PayloadAction<{
-                date: string
+                date: TasksDate
                 containerId: string
                 title: string
             }>
         ) => {
             const { date, containerId, title } = action.payload
-            const targetContainer = state.tasks[date].containers.find(
-                (c) => c.id === containerId
-            )
-            state.tasks[date].containers.map((c) =>
+            const targetContainer = state.containers[date.year][date.month][
+                date.date
+            ].find((c) => c.id === containerId)
+            state.containers[date.year][date.month][date.date].map((c) =>
                 c.id === targetContainer?.id
                     ? {
                           ...c,
@@ -349,14 +361,16 @@ const calendarSlice = createSlice({
         reOrderContainers: (
             state,
             action: PayloadAction<{
-                date: string
+                date: TasksDate
                 oldIndex: number
                 newIndex: number
             }>
         ) => {
             const { date, oldIndex, newIndex } = action.payload
-            state.tasks[date].containers = arrayMove(
-                state.tasks[date].containers,
+            const containers =
+                state.containers[date.year][date.month][date.date]
+            state.containers[date.year][date.month][date.date] = arrayMove(
+                containers,
                 newIndex,
                 oldIndex
             )
