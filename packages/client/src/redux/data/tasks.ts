@@ -8,7 +8,10 @@ type Container = {
     tasks: Task[]
 }
 
-export type Tasks = Record<string, Record<string, Record<string, Container[]>>>
+export type Containers = Record<
+    string,
+    Record<string, Record<string, Container[]>>
+>
 
 // I want to get the current year, month, date using dayjs
 
@@ -16,7 +19,7 @@ const year = dayjs().year()
 const month = dayjs().month()
 const date = dayjs().date()
 
-export const tasks: Tasks = {
+export const containers: Containers = {
     [year]: {
         [month]: {
             [date]: [
