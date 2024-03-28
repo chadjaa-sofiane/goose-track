@@ -11,14 +11,12 @@ type Container = {
 export type Tasks = Record<
     string,
     {
-        containersOrder: string[]
         containers: Container[]
     }
 >
 
 export const tasks: Tasks = {
     '2024-0-8': {
-        containersOrder: ['todo', 'inProgressList', 'doneList'],
         containers: [
             {
                 id: 'f3bde478-8c91-4da3-9bae-7269063c1b8d',
