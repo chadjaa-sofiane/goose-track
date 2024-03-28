@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import { Task } from '../calendarSlice'
 
 type Container = {
@@ -9,10 +10,16 @@ type Container = {
 
 export type Tasks = Record<string, Record<string, Record<string, Container[]>>>
 
+// I want to get the current year, month, date using dayjs
+
+const year = dayjs().year()
+const month = dayjs().month()
+const date = dayjs().date()
+
 export const tasks: Tasks = {
-    '2024': {
-        '8': {
-            '28': [
+    [year]: {
+        [month]: {
+            [date]: [
                 {
                     id: 'f3bde478-8c91-4da3-9bae-7269063c1b8d',
                     title: 'to do list',
