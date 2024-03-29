@@ -276,7 +276,7 @@ const calendarSlice = createSlice({
         },
 
         editTask: (
-            _,
+            state,
             action: PayloadAction<TaskFormReducerPayload & { taskId: string }>
         ) => {
             const {
@@ -285,17 +285,23 @@ const calendarSlice = createSlice({
                 taskId,
                 ...updatedTask
             } = action.payload
-            const container = containers[date.year][date.month][date.date].find(
+
+            const containers =
+                state.containers[date.year][date.month][date.date]
+
+            const containerIndex = containers.findIndex(
                 (c) => c.id === targetContainerId
             )
-            if (!container) return
-            const taskIndex = container?.tasks.findIndex(
+
+            if (containerIndex == -1) return
+
+            const taskIndex = containers[containerIndex].tasks.findIndex(
                 (task) => task.id === taskId
             )
 
             if (taskIndex !== -1) {
-                container.tasks[taskIndex] = {
-                    ...container.tasks[taskIndex],
+                containers[containerIndex].tasks[taskIndex] = {
+                    ...containers[containerIndex].tasks[taskIndex],
                     ...updatedTask,
                 }
             }
