@@ -1,7 +1,8 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 import dayjs from 'dayjs'
-import { Tasks, tasks } from './data/tasks'
+import { containers, Containers } from './data/tasks'
 import { TaskFormFields } from '@/api/calendarApi'
+import { arrayMove } from '@dnd-kit/sortable'
 
 export const DISPLAY = ['month', 'day'] as const
 export type Display = (typeof DISPLAY)[number]
@@ -17,14 +18,21 @@ export const WEEK_DAYS = [
 
 export const priorites = ['low', 'medium', 'high'] as const
 
+export type TasksDate = {
+    year: number
+    month: number
+    date: number
+}
+
 export type Task = {
     id: string
+    createdAt: string
     userId: string
     title: string
     start: string
     end: string
     // status?: number
-    date: string
+    // date: string
     priority: (typeof priorites)[number]
 }
 
@@ -35,7 +43,7 @@ interface CalendarState {
     currentMonth: number
     currentYear: number
     display: Display
-    tasks: Tasks
+    containers: Containers
 }
 
 const initialState: CalendarState = {
@@ -45,8 +53,7 @@ const initialState: CalendarState = {
     currentMonth: dayjs().month(),
     currentYear: dayjs().year(),
     display: 'month',
-    tasks,
-    // tasks: tasks
+    containers,
 }
 
 const changeMonth = (month: number, year: number, increment: number) => {
@@ -59,7 +66,13 @@ const changeMonth = (month: number, year: number, increment: number) => {
 
 export type TaskFormReducerPayload = TaskFormFields & {
     container: string
-    date: string
+    date: TasksDate
+}
+
+export type CreateContainerPayload = {
+    date: TasksDate
+    title: string
+    prevContainerId: string
 }
 
 const changeDate = (
@@ -134,74 +147,132 @@ const calendarSlice = createSlice({
         markTask: (
             state,
             action: PayloadAction<{
-                date: string
+                date: TasksDate
                 container: string
                 id: string
             }>
         ) => {
-            const { container: targetContainer, date, id } = action.payload
-            const containers = state.tasks[date].containers
-            let task: Task | undefined
-            for (const containerKey in containers) {
-                if (containerKey !== targetContainer) {
-                    const container = containers[containerKey]
-                    task = container.tasks.find((task) => task.id === id)
+            const { container: targetContainerId, date, id } = action.payload
+            const containers =
+                state.containers[date.year][date.month][date.date]
+
+            const targetContainer = containers.find(
+                (c) => c.id === targetContainerId
+            )
+            if (!targetContainer) return
+            for (const container of containers) {
+                if (container.id !== targetContainerId) {
+                    const task = container.tasks.find((task) => task.id === id)
                     if (task) {
+                        targetContainer.tasks = [...targetContainer.tasks, task]
                         container.tasks = container.tasks.filter(
-                            (task) => task.id !== id
+                            (t) => t.id !== task.id
                         )
                         break
                     }
                 }
             }
-            if (task) containers[targetContainer].tasks.push(task)
         },
-        createDayTask: (state, action: PayloadAction<{ date: string }>) => {
-            const { date } = action.payload
-            state.tasks = {
-                ...state.tasks,
-                [date]: {
-                    containers: {
-                        todo: {
-                            order: 0,
-                            title: 'to do list',
-                            tasks: [],
+        createEmptyContainer: {
+            reducer: (
+                state,
+                action: PayloadAction<{
+                    date: TasksDate
+                    createdAt: string
+                    id: string
+                }>
+            ) => {
+                const { date, createdAt, id } = action.payload
+
+                state.containers = {
+                    ...state.containers,
+                    [date.year]: {
+                        ...(state.containers[date.year] || {}),
+                        [date.month]: {
+                            ...(state.containers[date.year][date.month] || {}),
+                            [date.date]: [
+                                {
+                                    id,
+                                    title: 'to do list',
+                                    createdAt,
+                                    tasks: [],
+                                },
+                            ],
                         },
                     },
-                },
-            }
+                }
+            },
+            prepare: (inputs: { date: TasksDate }) => {
+                const createdAt = generateTemporaryTime()
+                const id = generateTemporaryId()
+                return {
+                    payload: {
+                        ...inputs,
+                        createdAt,
+                        id,
+                    },
+                }
+            },
         },
         addTask: {
             reducer: (
                 state,
-                action: PayloadAction<TaskFormReducerPayload & { id: string }>
+                action: PayloadAction<
+                    TaskFormReducerPayload & { id: string; createdAt: string }
+                >
             ) => {
-                const container = action.payload.container
-                const taskInput = action.payload
-                const date = action.payload.date
-                state.tasks[date].containers[container].tasks.push({
-                    ...taskInput,
-                    userId: 'sometihng',
-                })
+                const {
+                    container: containerId,
+                    date,
+                    ...taskInputs
+                } = action.payload
+
+                const containers =
+                    state.containers[date.year][date.month][date.date]
+
+                state.containers[date.year][date.month][date.date] =
+                    containers.map((container) =>
+                        container.id === containerId
+                            ? {
+                                  ...container,
+                                  tasks: [
+                                      ...container.tasks,
+                                      {
+                                          userId: 'something something',
+                                          ...taskInputs,
+                                      },
+                                  ],
+                              }
+                            : container
+                    )
             },
             prepare: (inputs: TaskFormReducerPayload) => {
                 const id = generateTemporaryId()
-                return { payload: { ...inputs, id } }
+                const createdAt = generateTemporaryTime()
+                return { payload: { ...inputs, id, createdAt } }
             },
         },
         deleteTask: (
             state,
             action: PayloadAction<{
-                date: string
+                date: TasksDate
                 container: string
                 taskId: string
             }>
         ) => {
-            const { date, container: targetContainer, taskId } = action.payload
-            const container = state.tasks[date].containers[targetContainer]
-            container.tasks = container.tasks.filter(
-                (task) => task.id !== taskId
-            )
+            const {
+                date,
+                container: targetContainerId,
+                taskId,
+            } = action.payload
+            const container = state.containers[date.year][date.month][
+                date.date
+            ].find((c) => c.id === targetContainerId)
+            if (container) {
+                container.tasks = container?.tasks.filter(
+                    (task) => task.id !== taskId
+                )
+            }
         },
 
         editTask: (
@@ -209,23 +280,110 @@ const calendarSlice = createSlice({
             action: PayloadAction<TaskFormReducerPayload & { taskId: string }>
         ) => {
             const {
-                container: targetContainer,
+                container: targetContainerId,
                 date,
                 taskId,
                 ...updatedTask
             } = action.payload
-            const container = state.tasks[date]?.containers[targetContainer]
-            if (!container) return
-            const taskIndex = container?.tasks.findIndex(
+
+            const containers =
+                state.containers[date.year][date.month][date.date]
+
+            const containerIndex = containers.findIndex(
+                (c) => c.id === targetContainerId
+            )
+
+            if (containerIndex == -1) return
+
+            const taskIndex = containers[containerIndex].tasks.findIndex(
                 (task) => task.id === taskId
             )
 
             if (taskIndex !== -1) {
-                container.tasks[taskIndex] = {
-                    ...container.tasks[taskIndex],
+                containers[containerIndex].tasks[taskIndex] = {
+                    ...containers[containerIndex].tasks[taskIndex],
                     ...updatedTask,
                 }
             }
+        },
+        addContainer: {
+            reducer: (
+                state,
+                action: PayloadAction<
+                    CreateContainerPayload & {
+                        containerId: string
+                        createdAt: string
+                    }
+                >
+            ) => {
+                const { date, title, containerId, createdAt, prevContainerId } =
+                    action.payload
+
+                const containers =
+                    state.containers[date.year][date.month][date.date]
+
+                const prevContainerIndex = containers.findIndex(
+                    (c) => c.id === prevContainerId
+                )
+
+                const newContainer = {
+                    id: containerId,
+                    title,
+                    createdAt,
+                    tasks: [],
+                }
+
+                if (prevContainerIndex !== -1) {
+                    state.containers[date.year][date.month][date.date] = [
+                        ...containers.slice(0, prevContainerIndex + 1),
+                        newContainer,
+                        ...containers.slice(prevContainerIndex + 1),
+                    ]
+                }
+            },
+            prepare: (inputs: CreateContainerPayload) => {
+                const containerId = generateTemporaryId()
+                const createdAt = generateTemporaryTime()
+                return { payload: { ...inputs, containerId, createdAt } }
+            },
+        },
+        updateContainerTitle: (
+            state,
+            action: PayloadAction<{
+                date: TasksDate
+                containerId: string
+                title: string
+            }>
+        ) => {
+            const { date, containerId, title } = action.payload
+            const targetContainer = state.containers[date.year][date.month][
+                date.date
+            ].find((c) => c.id === containerId)
+            state.containers[date.year][date.month][date.date].map((c) =>
+                c.id === targetContainer?.id
+                    ? {
+                          ...c,
+                          title,
+                      }
+                    : c
+            )
+        },
+        reOrderContainers: (
+            state,
+            action: PayloadAction<{
+                date: TasksDate
+                oldIndex: number
+                newIndex: number
+            }>
+        ) => {
+            const { date, oldIndex, newIndex } = action.payload
+            const containers =
+                state.containers[date.year][date.month][date.date]
+            state.containers[date.year][date.month][date.date] = arrayMove(
+                containers,
+                newIndex,
+                oldIndex
+            )
         },
     },
 })
@@ -236,6 +394,11 @@ function generateTemporaryId() {
     return `${timestamp}-${randomPart}`
 }
 
+function generateTemporaryTime() {
+    const date = new Date()
+    return date.toISOString()
+}
+
 export const {
     nextMonth,
     prevMonth,
@@ -244,9 +407,12 @@ export const {
     prevWeek,
     setDate,
     markTask,
-    createDayTask,
+    createEmptyContainer,
     addTask,
     deleteTask,
     editTask,
+    addContainer,
+    updateContainerTitle,
+    reOrderContainers,
 } = calendarSlice.actions
 export default calendarSlice.reducer
