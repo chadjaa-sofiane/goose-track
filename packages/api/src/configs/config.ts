@@ -51,8 +51,9 @@ const testConfigs = {
     },
 }
 
-const APP_ENV = process.env.BUN_ENV as 'development' | 'production' | 'test'
+const APP_ENV = process.env.NODE_ENV as 'development' | 'production' | 'test'
 
+console.log(APP_ENV)
 const configs: Record<typeof APP_ENV, Config> = {
     development: developmentConfigs,
     production: productionConfigs,

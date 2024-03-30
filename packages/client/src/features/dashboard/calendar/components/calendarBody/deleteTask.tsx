@@ -1,13 +1,13 @@
 import { Button } from '@/components/button'
 import { Dialog, DialogContent } from '@/components/dialog'
 import { useAppDispatch } from '@/hooks/reduxHooks'
-import { deleteTask } from '@/redux/calendarSlice'
+import { TasksDate, deleteTask } from '@/redux/calendarSlice'
 import { useEffect, useState } from 'react'
 
 interface DeleteTaskProps {
     open: boolean
     setOpen: (open: boolean) => void
-    date: string
+    date: TasksDate
     container: string
     taskId: string
 }

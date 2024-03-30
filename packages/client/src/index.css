@@ -23,6 +23,11 @@
     z-index: 1;
 }
 
+#root {
+    isolation: isolate;
+    z-index: 1;
+}
+
 @media (prefers-color-scheme: light) {
     :root {
         --color-bg: 0deg 0% 100%;

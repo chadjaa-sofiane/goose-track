@@ -39,22 +39,24 @@ export const getDaysOfMonth = (
     for (let i = 0; i < firstDateOfMonth.day(); i++) {
         daysOfMonth.push(firstDateOfMonth.day(i))
     }
+
     for (let i = firstDateOfMonth.date(); i <= lastDateOfMonth.date(); i++) {
         daysOfMonth.push(firstDateOfMonth.date(i))
     }
 
     for (
-        let i = lastDateOfMonth.day();
-        i < lastDateOfMonth.endOf('week').day();
+        let i = lastDateOfMonth.day() + 1;
+        i <= lastDateOfMonth.endOf('week').day();
         i++
     ) {
-        daysOfMonth.push(lastDateOfMonth.day(i))
+        daysOfMonth.push(firstDateOfMonth.day(i))
     }
+
     return daysOfMonth
 }
 
 export const getDaysOfWeek = (
-    year = dayjs().month(),
+    year = dayjs().year(),
     month = dayjs().month(),
     date = dayjs().date()
 ) => {
@@ -65,8 +67,8 @@ export const getDaysOfWeek = (
         .startOf('week')
 
     const daysOfWeek = []
-    for (let i = startOfTheWeek.date(); i <= startOfTheWeek.date() + 6; i++) {
-        daysOfWeek.push(startOfTheWeek.date(i))
+    for (let i = 0; i < 7; i++) {
+        daysOfWeek.push(startOfTheWeek.add(i, 'day'))
     }
 
     return daysOfWeek
@@ -113,6 +115,7 @@ export const extractMongooseErrors = (error: MongooseError | null) => {
             [keys[0]]: `${keys[0]} already exists !`,
         }
     }
+    return {}
 }
 
 /**
@@ -141,13 +144,23 @@ export const mapServerErrorsToForm = <
     }
 }
 
-export const debounce = <F extends (...args: unknown[]) => unknown>(
+/**
+ * Debounces a function by delaying its execution until a certain amount of time has passed without any further calls.
+ *
+ * @template F - The type of the debounced function.
+ * @param {F} func - The function to be debounced.
+ * @param {number} delay - The delay in milliseconds before the function is executed.
+ * @returns {(...args: Parameters<F>) => void} - The debounced function.
+ */
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const debounce = <F extends (...args: any[]) => unknown>(
     func: F,
     delay: number
 ) => {
     let timeout: ReturnType<typeof setTimeout> | null = null
 
-    return (...args: unknown[]) => {
+    return (...args: Parameters<F>) => {
         if (timeout) {
             clearTimeout(timeout)
         }
