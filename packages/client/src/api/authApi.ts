@@ -1,8 +1,10 @@
-import { type Response, api } from '.'
+import ApiService, { type Response } from '.'
 import { z } from 'zod'
 import { isAxiosError } from 'axios'
 import type { ZodIssue } from 'zod'
 import { extractErrorsFromIssues, extractMongooseErrors } from '@/lib/utils'
+
+const apiV1 = ApiService.getApiInstance('v1')
 
 export const loginSchema = z.object({
     email: z.string().email('please provide a valid email address'),
@@ -20,7 +22,7 @@ export type Login = (inputs: LoginFields) => Promise<LoginResponse>
 
 export const login: Login = async ({ email, password }) => {
     try {
-        const result = await api.post<{ data: LoginFields }>('/auth/login', {
+        const result = await apiV1.post<{ data: LoginFields }>('/auth/login', {
             email,
             password,
         })
@@ -73,7 +75,7 @@ export type Register = (inputs: RegisterFields) => Promise<RegisterResponse>
 
 export const register: Register = async ({ name, email, password }) => {
     try {
-        const result = await api.post<{ data: RegisterFields }>(
+        const result = await apiV1.post<{ data: RegisterFields }>(
             '/auth/register',
             {
                 name,
@@ -105,7 +107,7 @@ export const register: Register = async ({ name, email, password }) => {
 
 export const logout = async () => {
     try {
-        await api.post('/auth/logout')
+        await apiV1.post('/auth/logout')
         return false
     } catch (error) {
         return true
