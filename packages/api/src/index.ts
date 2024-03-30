@@ -32,8 +32,8 @@ jwtPassport(passport)
 app.use(passport.initialize())
 
 // the routers
-app.use('/auth', authRouter)
-app.use('/user', userRouter)
+app.use('/api/v1/auth', authRouter)
+app.use('/api/v1/user', userRouter)
 
 config.env !== 'test' &&
     app.listen(config.port, () => {
