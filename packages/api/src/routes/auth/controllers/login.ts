@@ -51,7 +51,7 @@ export const login: RequestHandler = async (
                 updatedAt: user.updatedAt,
                 email: user.email,
                 name: user.name,
-            }
+            },
         })
     } catch (error) {
         return res.status(500).json(error)

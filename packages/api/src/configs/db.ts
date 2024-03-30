@@ -14,9 +14,7 @@ const createMongoose = () => {
                 console.log(
                     chalk.greenBright(`
         connected to the database succesfuly! 
-        database name: ${chalk.white(
-        mongoose.connection.db.databaseName
-                            )}
+        database name: ${chalk.white(mongoose.connection.db.databaseName)}
                     `)
                 )
             } catch (error) {

@@ -24,7 +24,9 @@ const developmentConfigs = {
     env: 'development',
     hostname: 'localhost',
     database: {
-        url: process.env.MONGODB_DEVELOPEMENT_URI || 'mongodb://localhost:27017/development',
+        url:
+            process.env.MONGODB_DEVELOPEMENT_URI ||
+            'mongodb://localhost:27017/development',
         db_name: 'development',
     },
 }
