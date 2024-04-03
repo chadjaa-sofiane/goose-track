@@ -13,7 +13,7 @@ import {
     type UpdateUserFields,
     updateUserSchema,
 } from '@/api/userApi'
-import { removeFalsyFields } from 'server/src/lib/removeFalsyFields'
+import { removeFalsyFields } from 'api/src/lib/removeFalsyFields'
 
 const Profile = () => {
     const fields = useAppSelector((select) => select.user.data)

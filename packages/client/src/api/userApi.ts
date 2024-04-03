@@ -1,7 +1,9 @@
 import { isAxiosError } from 'axios'
-import { Response, api } from '.'
+import ApiService, { Response } from '.'
 import { extractErrorsFromIssues } from '@/lib/utils'
 import { ZodIssue, z } from 'zod'
+
+const apiV1 = ApiService.getApiInstance('v1')
 
 export interface UserFields {
     name: string
@@ -21,7 +23,7 @@ export type GetUserDataResponse = Response<ReturnedUserData, UserFields>
 
 export const getUserData = async (): Promise<GetUserDataResponse> => {
     try {
-        const result = await api.get<{ user: ReturnedUserData }>('/user/me')
+        const result = await apiV1.get<{ user: ReturnedUserData }>('/user/me')
 
         return {
             success: true,
@@ -99,7 +101,7 @@ export const updateUserData = async (
     inputs?: UpdateUserDataInputs
 ): Promise<UpdateUserDataResponse> => {
     try {
-        const result = await api.put<{ data: ReturnedUserData }>(
+        const result = await apiV1.put<{ data: ReturnedUserData }>(
             'user/update',
             inputs
         )

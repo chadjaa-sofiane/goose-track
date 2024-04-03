@@ -17,7 +17,7 @@ const userSchema = new Schema(
             required: true,
         },
         phone: {
-            type: String
+            type: String,
         },
         birthday: {
             type: Date,

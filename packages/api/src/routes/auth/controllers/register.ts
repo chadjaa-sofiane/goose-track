@@ -56,7 +56,7 @@ export const register: RequestHandler = async (
                 error: null,
                 data: {
                     _id: savedUser._id,
-                }
+                },
             })
         } catch (error) {
             return res.status(409).json({ error, data: null })

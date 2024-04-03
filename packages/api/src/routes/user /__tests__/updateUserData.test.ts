@@ -261,16 +261,20 @@ describe('updateUserData', () => {
                 .send(input.inputs)
 
             expect(response.statusCode).toEqual(input.statusCode)
-            switch (input.statusCode){
-                case 400: 
-                    expect(response.body.issues.length).toBeGreaterThanOrEqual(1)
+            switch (input.statusCode) {
+                case 400:
+                    expect(response.body.issues.length).toBeGreaterThanOrEqual(
+                        1
+                    )
                     expect(response.body.errors).toBeUndefined()
                     expect(response.body.data).toBeUndefined()
                     break
-                case 200: 
+                case 200:
                     expect(response.body.issues).toBeUndefined()
-                    expect(new Date(response.body.data.birthday)).toBeDate()    
-                    expect(new Date(response.body.data.birthday)).toEqual(new Date(input.inputs.birthday))    
+                    expect(new Date(response.body.data.birthday)).toBeDate()
+                    expect(new Date(response.body.data.birthday)).toEqual(
+                        new Date(input.inputs.birthday)
+                    )
             }
         }
     })

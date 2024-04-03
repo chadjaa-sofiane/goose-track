@@ -50,7 +50,7 @@ describe('Login API', () => {
         const response = await request(app)
             .post(path)
             .set('Cookie', `access_token=${jwtToken}`)
-            
+
         expect(response.statusCode).toEqual(200)
         // expect().toBeEmpty()
     })
