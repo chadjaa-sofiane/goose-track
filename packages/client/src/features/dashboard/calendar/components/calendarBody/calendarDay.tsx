@@ -119,7 +119,7 @@ const TasksSpaceContainer = () => {
     const ref = useRef<HTMLDivElement>(null)
 
     const containers = useAppSelector(
-        (state) => state.calendar.containers[year][month][date]
+        (state) => state.calendar.containers?.[year]?.[month]?.[date]
     )
 
     useEffect(() => {
