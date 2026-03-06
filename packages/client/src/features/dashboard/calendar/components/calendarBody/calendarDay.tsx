@@ -26,7 +26,7 @@ import {
     DraggableAttributes,
     closestCenter,
 } from '@dnd-kit/core'
-import { Task } from '@/redux/calendarSlice'
+import type { Task } from '@/redux/calendarSlice'
 import { AddTask, UseEditTask } from './TaskForm'
 import CircleArrowIcon from '@/features/dashboard/assets/circle-arrow.svg?react'
 import DraggableIcon from '@/features/dashboard/assets/draggable.svg?react'
