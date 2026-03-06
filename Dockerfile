@@ -24,5 +24,5 @@ COPY --from=build /app /app
 
 EXPOSE 3000
 
-# Seed demo user before API startup.
-CMD ["sh", "-lc", "bun run --cwd packages/api seed:dummy-user && bun run --cwd packages/api start"]
+# Ensure JWT key files exist, then seed demo user and start API.
+CMD ["sh", "-lc", "bun --cwd packages/api scripts/generateKeys.js && bun run --cwd packages/api seed:dummy-user && bun run --cwd packages/api start"]
