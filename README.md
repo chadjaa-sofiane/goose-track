@@ -68,3 +68,5 @@ Required Railway variables:
 
 Optional:
 - `CORS_ORIGIN` (used in non-production; defaults to `http://localhost:5173`)
+
+Note: in Railway Docker deploys, the container now runs `seed:dummy-user` automatically before starting the API.

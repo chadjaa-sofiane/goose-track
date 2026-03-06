@@ -12,4 +12,4 @@ ENV PORT=3000
 
 EXPOSE 3000
 
-CMD ["bun", "run", "--cwd", "packages/api", "src/index.ts"]
+CMD ["sh", "-lc", "bun run --cwd packages/api scripts/seedDummyUser.ts && bun run --cwd packages/api src/index.ts"]
