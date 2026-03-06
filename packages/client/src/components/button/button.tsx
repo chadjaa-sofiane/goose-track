@@ -1,8 +1,8 @@
 import { cn } from '@/lib/utils'
-import { ComponentPropsWithoutRef, ReactElement } from 'react'
+import { ComponentPropsWithoutRef, ReactElement, ReactNode } from 'react'
 
 interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
-    children: string
+    children: ReactNode
     icons?: {
         start?: ReactElement
         end?: ReactElement
