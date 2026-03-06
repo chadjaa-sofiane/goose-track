@@ -21,10 +21,10 @@ const Button = ({
             disabled={disabled}
             {...rest}
             className={cn(
-                'px-6 py-4 bg-accents-1 text-white rounded-2xl font-bold  flex items-center gap-x-3 first-letter:uppercase',
+                'px-6 py-4 bg-accents-1 text-white rounded-2xl font-bold flex items-center gap-x-3 first-letter:uppercase transition-all duration-300',
                 {
                     'cursor-not-allowed opacity-50': disabled,
-                    'hover:bg-accents-2': !disabled,
+                    'hover:bg-accents-2 hover:-translate-y-0.5': !disabled,
                 },
                 className
             )}

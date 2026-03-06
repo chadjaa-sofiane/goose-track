@@ -60,7 +60,7 @@ const MonthHeader = () => {
                 </span>
                 <span>{year}</span>
             </div>
-            <div className="flex bg-[#42434b] gap-x-0.5 rounded-lg overflow-hidden border-2 border-[#42434b]">
+            <div className="flex gap-x-0.5 overflow-hidden rounded-lg border border-accents-4 bg-accents-4/70">
                 <PrevMonthButton
                     onClick={handlePrevMonth}
                     disabled={!canGoPrevMonth}
@@ -92,7 +92,7 @@ const MonthDay = () => {
                 </span>
                 <span>{year}</span>
             </div>
-            <div className="flex bg-[#42434b] gap-x-0.5 rounded-lg overflow-hidden border-2 border-[#42434b]">
+            <div className="flex gap-x-0.5 overflow-hidden rounded-lg border border-accents-4 bg-accents-4/70">
                 <PrevMonthButton onClick={handlePrevMonth} />
                 <NextMonthButton onClick={handleNextMonth} />
             </div>
@@ -114,16 +114,19 @@ const NavigateMonthButton =
     ({ disabled = false, onClick }: NavigateMonthButtonProps) => {
         return (
             <button
-                className={cn('p-2 bg-accents-6', {
-                    'cursor-not-allowed': disabled,
-                    'cursor-pointer  hover:bg-opacity-75 ': !disabled,
-                })}
+                className={cn(
+                    'bg-accents-5 p-2 transition-colors duration-200',
+                    {
+                        'cursor-not-allowed': disabled,
+                        'cursor-pointer hover:bg-accents-3/40': !disabled,
+                    }
+                )}
                 disabled={disabled}
                 onClick={onClick}
             >
                 <Icon
-                    className={cn('stroke-white', {
-                        'stroke-[#42434b]': disabled,
+                    className={cn('stroke-text', {
+                        'stroke-text/30': disabled,
                     })}
                 />
             </button>

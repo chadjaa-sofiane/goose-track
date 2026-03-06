@@ -5,9 +5,13 @@ import { cleanLoginResponse, loginAsync } from '@/redux/authSlice'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { mapServerErrorsToForm } from '@/lib/utils'
+import { useSearchParams } from 'react-router-dom'
 
 export const useLogin = () => {
     const dispatch = useAppDispatch()
+    const [searchParams] = useSearchParams()
+    const emailParam = searchParams.get('email')
+    const passwordParam = searchParams.get('password')
 
     const loginResponse = useAppSelector((state) => state.auth.loginResponse)
 
@@ -18,6 +22,13 @@ export const useLogin = () => {
         setError,
     } = useForm<LoginFields>({
         resolver: zodResolver(loginSchema),
+        defaultValues:
+            emailParam && passwordParam
+                ? {
+                      email: emailParam,
+                      password: passwordParam,
+                  }
+                : undefined,
     })
 
     useEffect(() => {

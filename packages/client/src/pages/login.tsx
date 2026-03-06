@@ -1,10 +1,12 @@
-import { LoginForm } from "@/features/auth"
-import ThemedLayout from "@/layouts/themedLayout"
+import { LoginForm } from '@/features/auth'
+import ThemedLayout from '@/layouts/themedLayout'
 
 const Login = () => {
-    return <ThemedLayout className="bg-[#dcebf7] dark:bg-bg">
-        <LoginForm />
-    </ThemedLayout>
+    return (
+        <ThemedLayout className="bg-bg">
+            <LoginForm />
+        </ThemedLayout>
+    )
 }
 
 export default Login

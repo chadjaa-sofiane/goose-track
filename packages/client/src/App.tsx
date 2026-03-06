@@ -1,11 +1,14 @@
-import { Provider as ReduxProvide } from "react-redux"
-import Router from "@/pages"
-import store from "@/redux/store"
+import { Provider as ReduxProvide } from 'react-redux'
+import Router from '@/pages'
+import store from '@/redux/store'
+import { ToastProvider } from '@/components/toast/toastProvider'
 
 const App = () => {
     return (
         <ReduxProvide store={store}>
-            <Router />
+            <ToastProvider>
+                <Router />
+            </ToastProvider>
         </ReduxProvide>
     )
 }

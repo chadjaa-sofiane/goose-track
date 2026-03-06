@@ -11,12 +11,21 @@ import {
     TaskFormReducerPayload,
     TasksDate,
     addTask,
+    deleteTask,
     editTask,
     priorites,
+    replaceTaskId,
 } from '@/redux/calendarSlice'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { TaskFormFields, taskFormSchema } from '@/api/calendarApi'
+import {
+    TaskFormFields,
+    taskFormSchema,
+    uploadTask,
+    updateTaskById,
+    isPersistedTaskId,
+} from '@/api/calendarApi'
 import PlusIcon from '@/assets/plus.svg?react'
+import { useToast } from '@/components/toast/toastProvider'
 
 interface TaskFormProps {
     container: string
@@ -168,7 +177,7 @@ const TaskForm = ({
                             </Button>
                             <Button
                                 type="button"
-                                className="bg-white text-[#111] hover:bg-white hover:bg-opacity-5 hover:text-white flex-1 grid place-items-center"
+                                className="grid flex-1 place-items-center border border-accents-4 bg-accents-5/40 text-text hover:bg-accents-4/70"
                             >
                                 cancel
                             </Button>
@@ -227,22 +236,54 @@ export const PriorityRadio = forwardRef<HTMLInputElement, PriorityRadio>(
     }
 )
 
-export const AddTask = (
-    props: Omit<
-        TaskFormProps,
-        | 'onSubmit'
-        | 'open'
-        | 'setOpen'
-        | 'children'
-        | 'defaultFields'
-        | 'submitTitle'
-    >
-) => {
+type AddTaskProps = Omit<
+    TaskFormProps,
+    | 'onSubmit'
+    | 'open'
+    | 'setOpen'
+    | 'children'
+    | 'defaultFields'
+    | 'submitTitle'
+> & {
+    buttonClassName?: string
+}
+
+export const AddTask = ({ buttonClassName, ...props }: AddTaskProps) => {
     const [open, setOpen] = useState(false)
     const dispatch = useAppDispatch()
-    const addTaskHundler: TaskFormProps['onSubmit'] = (inputs, reset) => {
+    const { pushToast } = useToast()
+    const addTaskHundler: TaskFormProps['onSubmit'] = async (inputs, reset) => {
         const { container, date, ...data } = inputs
-        dispatch(addTask({ container, date, ...data }))
+        const action = dispatch(addTask({ container, date, ...data }))
+        const localTaskId = action.payload.id as string
+        const taskDate = new Date(
+            date.year,
+            date.month,
+            date.date
+        ).toISOString()
+        try {
+            const result = await uploadTask({
+                ...data,
+                date: taskDate,
+                container: props.title,
+            })
+            if (result.success) {
+                dispatch(
+                    replaceTaskId({
+                        date,
+                        container,
+                        fromId: localTaskId,
+                        toId: result.data._id,
+                    })
+                )
+            } else {
+                dispatch(deleteTask({ date, container, taskId: localTaskId }))
+                pushToast('Task save failed. Changes were reverted.', 'error')
+            }
+        } catch {
+            dispatch(deleteTask({ date, container, taskId: localTaskId }))
+            pushToast('Task save failed. Changes were reverted.', 'error')
+        }
         reset()
     }
     return (
@@ -258,7 +299,10 @@ export const AddTask = (
                 icons={{
                     start: <PlusIcon />,
                 }}
-                className="w-full flex items-center justify-center gap-x-2"
+                className={cn(
+                    'w-full flex items-center justify-center gap-x-2',
+                    buttonClassName
+                )}
             >
                 Add Task
             </Button>
@@ -280,13 +324,61 @@ export const UseEditTask = ({ ...rest }: EditTaskProps) => {
     const [open, setOpen] = useState(false)
     const [currentTask, setcurrentTask] = useState<Task | null>(null)
     const dispatch = useAppDispatch()
+    const { pushToast } = useToast()
 
-    const handleEditTask: TaskFormProps['onSubmit'] = (inputs) => {
+    const handleEditTask: TaskFormProps['onSubmit'] = async (inputs) => {
         if (currentTask) {
             const { container, date, ...data } = inputs
+            const previousTask = { ...currentTask }
             dispatch(
                 editTask({ container, date, taskId: currentTask.id, ...data })
             )
+            if (isPersistedTaskId(currentTask.id)) {
+                try {
+                    const result = await updateTaskById(currentTask.id, {
+                        ...data,
+                        container: rest.title,
+                        date: new Date(
+                            date.year,
+                            date.month,
+                            date.date
+                        ).toISOString(),
+                    })
+                    if (!result.success) {
+                        dispatch(
+                            editTask({
+                                container,
+                                date,
+                                taskId: currentTask.id,
+                                title: previousTask.title,
+                                start: previousTask.start,
+                                end: previousTask.end,
+                                priority: previousTask.priority,
+                            })
+                        )
+                        pushToast(
+                            'Task update failed. Changes were reverted.',
+                            'error'
+                        )
+                    }
+                } catch {
+                    dispatch(
+                        editTask({
+                            container,
+                            date,
+                            taskId: currentTask.id,
+                            title: previousTask.title,
+                            start: previousTask.start,
+                            end: previousTask.end,
+                            priority: previousTask.priority,
+                        })
+                    )
+                    pushToast(
+                        'Task update failed. Changes were reverted.',
+                        'error'
+                    )
+                }
+            }
         }
     }
 

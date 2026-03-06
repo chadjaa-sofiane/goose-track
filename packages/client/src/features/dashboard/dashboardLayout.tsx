@@ -14,14 +14,14 @@ const DashboardLayout = () => {
     const [openNav, setOpenNav] = useState(false)
 
     return (
-        <ThemedLayout className="min-h-screen bg-[#dcebf7] dark:bg-bg">
+        <ThemedLayout className="min-h-screen bg-bg text-text">
             <div className="flex">
                 <NavigationBar
                     open={openNav}
                     setOpen={setOpenNav}
                     routes={DashboardRoutesfrom}
                 />
-                <main className="w-full lg:w-10/12 min-h-screen h-fit flex flex-col gap-y-[2.375em] px-5 py-6 md:py-8 md:px-[2.875em] dark:bg-[#171820]">
+                <main className="w-full lg:w-10/12 min-h-screen h-fit flex flex-col gap-y-[2.375em] px-5 py-6 md:py-8 md:px-[2.875em] bg-transparent">
                     <Outlet
                         context={
                             { openNav, setOpenNav } satisfies OutletContextType

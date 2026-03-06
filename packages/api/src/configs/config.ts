@@ -25,6 +25,7 @@ const developmentConfigs = {
     hostname: 'localhost',
     database: {
         url:
+            process.env.MONGODB_DEVELOPMENT_URI ||
             process.env.MONGODB_DEVELOPEMENT_URI ||
             'mongodb://localhost:27017/development',
         db_name: 'development',
@@ -51,13 +52,14 @@ const testConfigs = {
     },
 }
 
-const APP_ENV = process.env.NODE_ENV as 'development' | 'production' | 'test'
+const APP_ENV =
+    (process.env.NODE_ENV as 'development' | 'production' | 'test') ||
+    'development'
 
-console.log(APP_ENV)
-const configs: Record<typeof APP_ENV, Config> = {
+const configs: Record<'development' | 'production' | 'test', Config> = {
     development: developmentConfigs,
     production: productionConfigs,
     test: testConfigs,
 }
 
-export default configs[APP_ENV]
+export default configs[APP_ENV] || developmentConfigs
