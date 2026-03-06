@@ -1,14 +1,14 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import NotFound from './notFound'
 import dashboardRoutes, { defaultRoute } from '@/features/dashboard/routes'
-import PrivateRoute from '@/components/privateRoute'
 import Home from './home'
 import Login from './login'
 import Signup from './signup'
 import Dashboard from './dashboard'
-import RedirectAuthenticatedRoute from '@/components/redirectAuthenticatedRoute'
+import RequireGuest from '@/components/requireGuest'
+import RequireAuth from '@/components/requireAuth'
 import { useEffect } from 'react'
-import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks'
+import { useAppDispatch } from '@/hooks/reduxHooks'
 import { getUserDataAsync } from '@/redux/userSlice'
 
 const router = createBrowserRouter([
@@ -19,14 +19,15 @@ const router = createBrowserRouter([
     },
     {
         path: '/auth',
+        element: <RequireGuest />,
         children: [
             {
                 path: 'login',
-                element: <RedirectAuthenticatedRoute component={Login} />,
+                element: <Login />,
             },
             {
                 path: 'signup',
-                element: <RedirectAuthenticatedRoute component={Signup} />,
+                element: <Signup />,
             },
             {
                 path: '*',
@@ -36,26 +37,26 @@ const router = createBrowserRouter([
     },
     {
         path: '/dashboard',
-        element: <PrivateRoute component={Dashboard} />,
-        children: [...dashboardRoutes, defaultRoute],
+        element: <RequireAuth />,
+        children: [
+            {
+                element: <Dashboard />,
+                children: [...dashboardRoutes, defaultRoute],
+            },
+        ],
     },
 ])
 
 const Router = () => {
     const dispatch = useAppDispatch()
-    const isLoading = useAppSelector((state) => state.user.isLoading)
-    const isLoggedIn = useAppSelector((state) => state.auth.isLoggedIn)
 
     useEffect(() => {
         const fetchUserData = async () => {
             await dispatch(getUserDataAsync())
         }
         fetchUserData()
-    }, [dispatch, isLoggedIn])
+    }, [dispatch])
 
-    if (isLoading) {
-        return <>the app is loading...</>
-    }
     return <RouterProvider router={router} />
 }
 

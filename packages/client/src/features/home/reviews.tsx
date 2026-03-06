@@ -1,30 +1,39 @@
-import User1Image from "./assets/user1.png"
-import User2Image from "./assets/user2.png"
-import LeftArrowIcon from "@/assets/left-arrow.svg?react"
-import RightArrowIcon from "@/assets/right-arrow.svg?react"
-import StarIcon from "@/assets/star.svg?react"
+import { motion } from 'framer-motion'
+import User1Image from './assets/user1.png'
+import User2Image from './assets/user2.png'
+import StarIcon from '@/assets/star.svg?react'
 
 const Reviews = () => {
-    return <div className="container mx-auto mt-[6.25em]">
-        <h2 className="text-accents-1 text-[1.5rem] font-bold text-center flex-wrap"> REVIEWS </h2>
-        <div className="flex flex-wrap mt-[3.125em]">
-            <div className="flex gap-x-6">
-                {users.map(user => (
-                    <Review
-                        key={user.id}
-                        name={user.name}
-                        rate={user.rate}
-                        image={user.image}
-                        message={user.message}
-                    />
-                ))}
-            </div>
-            <div className="w-full mt-8 flex justify-center gap-x-4">
-                <LeftArrowIcon className="cursor-pointer" />
-                <RightArrowIcon className="cursor-pointer" />
-            </div>
-        </div>
-    </div>
+    return (
+        <section className="mt-12 md:mt-16">
+            <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{ duration: 0.5 }}
+                className="glass-panel rounded-[1.8rem] px-5 py-8 md:px-8"
+            >
+                <h2 className="text-center text-3xl font-bold text-accents-6 md:text-4xl">
+                    Loved by teams shipping fast
+                </h2>
+                <p className="mx-auto mt-3 max-w-2xl text-center text-slate-700">
+                    OrbitFlow helps people stay accountable without drowning in
+                    tabs, toggles, and clutter.
+                </p>
+                <div className="mt-8 grid gap-4 md:grid-cols-2">
+                    {users.map((user) => (
+                        <Review
+                            key={user.id}
+                            name={user.name}
+                            rate={user.rate}
+                            image={user.image}
+                            message={user.message}
+                        />
+                    ))}
+                </div>
+            </motion.div>
+        </section>
+    )
 }
 
 interface ReviewProps {
@@ -34,44 +43,57 @@ interface ReviewProps {
     message: string
 }
 
-
-
 const Review = ({ image, name, rate, message }: ReviewProps) => {
-    return <div className="flex gap-x-[1.125em] p-8 border border-[#111111] border-opacity-10 rounded-md">
-        <div className="w-[3.625em] h-[3.625em]">
-            <img className="w-full h-full object-fill" src={image} alt={name} />
-        </div>
-        <div className="flex-1">
-            <div>
-                <span className="text-[1.125rem] font-bold" > {name} </span>
-                <div className="flex gap-x-2.5 mt-[0.8125em]">
-                    {[false, false, false, false, false].map((_, index) => (<StarIcon key={index} className={
-                        `
-                            ${index + 1 <= rate ? "fill-[#FFAC33]" : "fill-[#CEC9C1]"}
-                        `
-                    } />))}
+    return (
+        <motion.article
+            whileHover={{ y: -4 }}
+            transition={{ duration: 0.2 }}
+            className="rounded-2xl border border-accents-1/20 bg-white/80 p-5"
+        >
+            <div className="flex items-center gap-x-4">
+                <img
+                    className="h-14 w-14 rounded-full object-cover"
+                    src={image}
+                    alt={name}
+                />
+                <div>
+                    <p className="text-lg font-bold text-accents-6">{name}</p>
+                    <div className="mt-2 flex gap-x-1.5">
+                        {[false, false, false, false, false].map((_, index) => (
+                            <StarIcon
+                                key={index}
+                                className={
+                                    index + 1 <= rate
+                                        ? 'fill-[#ffac33]'
+                                        : 'fill-[#d9d8d2]'
+                                }
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
-            <p className="leading-[1.125rem] font-medium mt-6"> {message} </p>
-        </div>
-    </div>
+            <p className="mt-5 leading-relaxed text-slate-700">{message}</p>
+        </motion.article>
+    )
 }
 
 const users = [
     {
         id: 2,
-        name: " Olena Doe ",
+        name: 'Olena Doe',
         image: User2Image,
-        rate: 2,
-        message: "GooseTrack is impressive, the calendar view and filter options make it easy to stay organized and focused. Highly recommended."
+        rate: 4,
+        message:
+            'OrbitFlow gives me one clean place to align deadlines and tasks. I spend less time planning and more time finishing work.',
     },
     {
         id: 1,
-        name: "Alexander Hubbard ",
+        name: 'Alexander Hubbard',
         image: User1Image,
-        rate: 4,
-        message: "GooseTrack is incredibly helpful, the sidebar with account management, calendar, and filter options make navigation seamless. Great for staying organized."
-    }
+        rate: 5,
+        message:
+            'The dashboard feels focused and quick. Calendar + profile + task flow now feels like one system instead of separate tools.',
+    },
 ]
 
-export default Reviews 
+export default Reviews

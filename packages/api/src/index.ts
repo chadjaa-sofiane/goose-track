@@ -4,9 +4,12 @@ import config from '@/configs/config'
 import createMongoose from '@/configs/db'
 import authRouter from '@/routes/auth'
 import userRouter from './routes/user '
+import taskRouter from '@/routes/task'
 import passport from 'passport'
 import jwtPassport from './configs/passport/jwt'
 import cookieParser from 'cookie-parser'
+import path from 'node:path'
+import { existsSync } from 'node:fs'
 
 import cors from 'cors'
 
@@ -22,7 +25,10 @@ app.use(express.urlencoded({ extended: true }))
 app.use(
     cors({
         credentials: true,
-        origin: 'http://localhost:5173',
+        origin:
+            config.env === 'production'
+                ? true
+                : process.env.CORS_ORIGIN || 'http://localhost:5173',
     })
 )
 app.use(cookieParser())
@@ -34,6 +40,21 @@ app.use(passport.initialize())
 // the routers
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/user', userRouter)
+app.use('/api/v1/tasks', taskRouter)
+
+if (config.env === 'production') {
+    const clientDistPath = path.resolve(process.cwd(), '../client/dist')
+
+    if (existsSync(clientDistPath)) {
+        app.use(express.static(clientDistPath))
+        app.get('*', (req, res, next) => {
+            if (req.path.startsWith('/api/')) {
+                return next()
+            }
+            return res.sendFile(path.join(clientDistPath, 'index.html'))
+        })
+    }
+}
 
 config.env !== 'test' &&
     app.listen(config.port, () => {

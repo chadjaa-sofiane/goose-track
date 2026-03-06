@@ -27,7 +27,7 @@ const NavigationBar = ({ open, setOpen, routes }: NavigationBarProps) => {
     return (
         <div
             className={cn(
-                'lg:w-2/12 fixed top-0 left-0 lg:relative h-screen flex flex-col p-8 gap-y-8 bg-bg transition-transform ease-out duration-300 z-10',
+                'lg:w-2/12 fixed top-0 left-0 lg:sticky lg:top-0 h-screen flex flex-col p-8 gap-y-8 bg-bg transition-transform ease-out duration-300 z-10 overflow-y-auto',
                 {
                     '-translate-x-full lg:translate-x-0': !open,
                 }
@@ -35,11 +35,13 @@ const NavigationBar = ({ open, setOpen, routes }: NavigationBarProps) => {
         >
             <div className="flex items-center gap-x-2.5">
                 <div className="w-[4.4375em] h-[4.25em]">
-                    <img className="object-cover" src={GooseSrc} alt="Goose" />
+                    <img
+                        className="object-cover"
+                        src={GooseSrc}
+                        alt="OrbitFlow mascot"
+                    />
                 </div>
-                <h1 className="font-bold text-2xl text-accents-1 dark:text-white">
-                    GooseTrack
-                </h1>
+                <h1 className="font-bold text-2xl text-accents-6">OrbitFlow</h1>
                 <div
                     className="lg:hidden cursor-pointer"
                     onClick={() => {
@@ -49,10 +51,7 @@ const NavigationBar = ({ open, setOpen, routes }: NavigationBarProps) => {
                     <CloseIcon />
                 </div>
             </div>
-            <h2 className="text-[#999999] dark:text-[#585a5d] font-bold ">
-                {' '}
-                User Panel{' '}
-            </h2>
+            <h2 className="text-text/60 font-bold "> User Panel </h2>
             <nav>
                 <ul className="flex flex-col gap-y-4">
                     {routes.map(({ path, title, icon }, index) => (

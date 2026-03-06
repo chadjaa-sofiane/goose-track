@@ -1,7 +1,9 @@
 import { Button } from '@/components/button'
 import { Dialog, DialogContent } from '@/components/dialog'
 import { useAppDispatch } from '@/hooks/reduxHooks'
-import { TasksDate, deleteTask } from '@/redux/calendarSlice'
+import { deleteTaskById, isPersistedTaskId } from '@/api/calendarApi'
+import { useToast } from '@/components/toast/toastProvider'
+import { Task, TasksDate, deleteTask, restoreTask } from '@/redux/calendarSlice'
 import { useEffect, useState } from 'react'
 
 interface DeleteTaskProps {
@@ -10,6 +12,7 @@ interface DeleteTaskProps {
     date: TasksDate
     container: string
     taskId: string
+    task?: Task
 }
 
 const DeleteTask = ({
@@ -18,11 +21,27 @@ const DeleteTask = ({
     date,
     container,
     taskId,
+    task,
 }: DeleteTaskProps) => {
     const dispatch = useAppDispatch()
+    const { pushToast } = useToast()
 
-    const deleteTaskHandler = () => {
+    const deleteTaskHandler = async () => {
         dispatch(deleteTask({ date, container, taskId }))
+        if (isPersistedTaskId(taskId)) {
+            try {
+                const result = await deleteTaskById(taskId)
+                if (!result.success && task) {
+                    dispatch(restoreTask({ date, container, task }))
+                    pushToast('Delete failed. Task was restored.', 'error')
+                }
+            } catch {
+                if (task) {
+                    dispatch(restoreTask({ date, container, task }))
+                    pushToast('Delete failed. Task was restored.', 'error')
+                }
+            }
+        }
         setOpen(false)
     }
 
@@ -51,15 +70,18 @@ export const UseDeleteTask = (
 ) => {
     const [open, setOpen] = useState(false)
     const [taskId, setTaskId] = useState<string | null>(null)
+    const [task, setTask] = useState<Task | undefined>(undefined)
 
-    const openDeleteTask = (taskId: string) => {
+    const openDeleteTask = (taskId: string, task?: Task) => {
         setTaskId(taskId)
+        setTask(task)
         setOpen(true)
     }
 
     useEffect(() => {
         if (open === false) {
             setTaskId(null)
+            setTask(undefined)
         }
     }, [open])
 
@@ -68,6 +90,7 @@ export const UseDeleteTask = (
             taskId && (
                 <DeleteTask
                     taskId={taskId}
+                    task={task}
                     open={open}
                     setOpen={setOpen}
                     {...props}

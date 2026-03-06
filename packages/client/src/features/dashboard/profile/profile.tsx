@@ -7,17 +7,18 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks'
 import { updateUserDataAsync } from '@/redux/userSlice'
-import { mapServerErrorsToForm } from '@/lib/utils'
+import { mapServerErrorsToForm, removeFalsyFields } from '@/lib/utils'
+import { useToast } from '@/components/toast/toastProvider'
 import {
     type UpdateUserDataResponse,
     type UpdateUserFields,
     updateUserSchema,
 } from '@/api/userApi'
-import { removeFalsyFields } from 'api/src/lib/removeFalsyFields'
 
 const Profile = () => {
     const fields = useAppSelector((select) => select.user.data)
     const dispatch = useAppDispatch()
+    const { pushToast } = useToast()
     const {
         register,
         handleSubmit,
@@ -43,7 +44,7 @@ const Profile = () => {
         const payload = result.payload as UpdateUserDataResponse
         if (payload?.errors) mapServerErrorsToForm(setError, payload?.errors)
         if (payload.success) {
-            alert('user get updated successfuly!')
+            pushToast('Profile updated successfully.', 'success')
         }
     }
 
@@ -53,7 +54,7 @@ const Profile = () => {
         <DashboardPageLayout title="User Profile">
             <form
                 onSubmit={handleSubmit(onSubmit)}
-                className="relative flex-1 bg-red-500 mt-24 md:mt-0 flex flex-col gap-y-11 items-center dark:bg-accents-6 rounded-xl px-8 py-10 lg:py-[3.75em]"
+                className="relative mt-24 flex flex-1 flex-col items-center gap-y-11 rounded-xl border border-accents-1/25 bg-accents-5/40 px-8 py-10 md:mt-0 lg:py-[3.75em]"
             >
                 <div className="flex flex-col items-center pt-20 md:pt-0">
                     <ProfileImageUploader
@@ -62,9 +63,7 @@ const Profile = () => {
                     />
                     <div className="flex flex-col items-center">
                         <span className="text-lg font-bold">Nadiia Doe</span>
-                        <span className="font-semibold text-[#62636a]">
-                            User
-                        </span>
+                        <span className="font-semibold text-text/65">User</span>
                     </div>
                 </div>
                 <div className="flex-1 w-full md:w-5/6 xl:w-3/4 flex flex-col gap-8">
@@ -120,8 +119,7 @@ const Profile = () => {
                             className="px-[5.25em] font-semibold"
                             disabled={showButton || isSubmitting}
                         >
-                            {' '}
-                            save changes{' '}
+                            save changes
                         </Button>
                     </div>
                 </div>

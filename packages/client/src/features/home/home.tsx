@@ -1,91 +1,115 @@
+import { motion } from 'framer-motion'
 import { HeroSection, Reviews } from '.'
-import CallenderImageSrc from './assets/callender_image.png'
+import CalendarImageSrc from './assets/callender_image.png'
 import DayOneImageSrc from './assets/day1_image.png'
 import SideBarImageSrc from './assets/sideBar_image.png'
 
+const sections = [
+    {
+        id: '01',
+        title: 'Command Center Calendar',
+        eyebrow: 'Clarity',
+        body: 'Scan your schedule in seconds. OrbitFlow combines tasks, deadlines, and context so every week is mapped before it starts.',
+        image: CalendarImageSrc,
+        alt: 'Calendar dashboard preview',
+    },
+    {
+        id: '02',
+        title: 'Navigation With Intent',
+        eyebrow: 'Control',
+        body: 'Move between profile, filters, and timelines without friction. The layout keeps your highest-impact actions one click away.',
+        image: SideBarImageSrc,
+        alt: 'Sidebar navigation preview',
+    },
+    {
+        id: '03',
+        title: 'All Priorities In One Flow',
+        eyebrow: 'Focus',
+        body: 'Bring goals, routines, and reminders into one timeline so your energy goes to execution, not tool switching.',
+        image: DayOneImageSrc,
+        alt: 'Unified workflow preview',
+    },
+]
+
 const Home = () => {
     return (
-        <div>
+        <div className="pb-20">
             <HeroSection />
-            <div className="container mx-auto mt-16 flex flex-col gap-y-16 px-5 lg:px-32">
-                <CallenderSection />
-                <SideBarSection />
-                <AllInSection />
-            </div>
-            <Reviews />
+            <main className="container mx-auto px-5 md:px-8">
+                <section className="mt-8 grid gap-8">
+                    {sections.map((item, index) => (
+                        <FeatureCard
+                            key={item.id}
+                            reverse={index % 2 === 1}
+                            {...item}
+                        />
+                    ))}
+                </section>
+                <Reviews />
+            </main>
         </div>
     )
 }
 
-const CallenderSection = () => {
-    return (
-        <div className="w-full flex flex-col gap-10 justify-between md:flex-row">
-            <div className="md:max-w-[17.1875em] md:ml-[4.8125em]">
-                <span className="block text-accents-1 text-[6rem] font-bold">
-                    1.
-                </span>
-                <span className="block w-fit text-accents-1 text-[2rem] font-bold bg-accents-3 px-[1.125em] py-2 rounded-full uppercase mt-3.5">
-                    Callender
-                </span>
-                <h2 className="text-[2rem] font-bold mt-2"> VIEW </h2>
-                <p className="font-medium leading-[1.125rem] mt-3.5">
-                    GooseTrack's Calendar view provides a comprehensive overview
-                    of your schedule, displaying all your tasks, events, and
-                    appointments in a visually appealing and intuitive layout.
-                </p>
-            </div>
-            <div>
-                <img src={CallenderImageSrc} alt="callender" />
-            </div>
-        </div>
-    )
+interface FeatureCardProps {
+    id: string
+    eyebrow: string
+    title: string
+    body: string
+    image: string
+    alt: string
+    reverse?: boolean
 }
 
-const SideBarSection = () => {
+const FeatureCard = ({
+    id,
+    eyebrow,
+    title,
+    body,
+    image,
+    alt,
+    reverse = false,
+}: FeatureCardProps) => {
     return (
-        <div className="w-full flex flex-col gap-10 justify-between md:flex-row-reverse">
-            <div className="md:max-w-[17.1875em] md:mr-[4.8125em]">
-                <span className="block text-accents-1 text-[6rem] font-bold">
-                    2.
-                </span>
-                <h2 className="text-[2rem] font-bold mt-2"> sideBar </h2>
-                <p className="font-medium leading-[1.125rem] mt-3.5">
-                    GooseTrack offers easy access to your account settings,
-                    calendar, and filters. The "My Account" section allows you
-                    to manage your profile information and preferences, while
-                    the calendar provides a quick and convenient way to view
-                    your upcoming events and tasks.
-                </p>
+        <motion.article
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            className="glass-panel rounded-[1.8rem] p-5 md:p-8"
+        >
+            <div
+                className={`grid items-center gap-7 md:grid-cols-2 ${
+                    reverse ? 'md:[&>*:first-child]:order-2' : ''
+                }`}
+            >
+                <div>
+                    <p className="text-sm font-semibold uppercase tracking-[0.28em] text-accents-1">
+                        {eyebrow}
+                    </p>
+                    <h2 className="mt-3 text-3xl font-bold leading-tight text-accents-6 md:text-4xl">
+                        {title}
+                    </h2>
+                    <p className="mt-4 text-base leading-relaxed text-slate-700">
+                        {body}
+                    </p>
+                    <span className="mt-6 inline-block rounded-full bg-accents-1 px-4 py-1 text-sm font-semibold text-white">
+                        {id}
+                    </span>
+                </div>
+                <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.25 }}
+                    className="overflow-hidden rounded-2xl"
+                >
+                    <img
+                        src={image}
+                        alt={alt}
+                        className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                    />
+                </motion.div>
             </div>
-            <div>
-                <img src={SideBarImageSrc} alt="sidebar" />
-            </div>
-        </div>
-    )
-}
-
-const AllInSection = () => {
-    return (
-        <div className="w-full flex flex-col gap-10 justify-between md:flex-row">
-            <div className="md:max-w-[17.1875em] md:ml-[4.8125em]">
-                <span className="block text-accents-1 text-[6rem] font-bold">
-                    3.
-                </span>
-                <span className="block w-fit text-accents-1 text-[2rem] font-bold bg-accents-3 px-[1.125em] py-2 rounded-full uppercase mt-3.5">
-                    All IN
-                </span>
-                <h2 className="text-[2rem] font-bold mt-2"> ONE </h2>
-                <p className="font-medium leading-[1.125rem] mt-3.5">
-                    GooseTrack is an all-in-one productivity tool that helps you
-                    stay on top of your tasks, events, and deadlines. Say
-                    goodbye to scattered to-do lists and hello to streamlined
-                    productivity with GooseTrack.
-                </p>
-            </div>
-            <div>
-                <img src={DayOneImageSrc} alt="all in one" />
-            </div>
-        </div>
+        </motion.article>
     )
 }
 

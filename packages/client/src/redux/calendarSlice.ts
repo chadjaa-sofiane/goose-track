@@ -69,6 +69,11 @@ export type TaskFormReducerPayload = TaskFormFields & {
     date: TasksDate
 }
 
+export type TaskForDatePayload = TaskFormFields & {
+    date: TasksDate
+    containerTitle?: string
+}
+
 export type CreateContainerPayload = {
     date: TasksDate
     title: string
@@ -252,6 +257,96 @@ const calendarSlice = createSlice({
                 return { payload: { ...inputs, id, createdAt } }
             },
         },
+        addTaskToDate: {
+            reducer: (
+                state,
+                action: PayloadAction<
+                    TaskForDatePayload & { id: string; createdAt: string }
+                >
+            ) => {
+                const { date, containerTitle, ...taskInputs } = action.payload
+                state.containers[date.year] = state.containers[date.year] || {}
+                state.containers[date.year][date.month] =
+                    state.containers[date.year][date.month] || {}
+                state.containers[date.year][date.month][date.date] =
+                    state.containers[date.year][date.month][date.date] || []
+
+                const containers =
+                    state.containers[date.year][date.month][date.date]
+
+                if (containers.length === 0) {
+                    containers.push({
+                        id: generateTemporaryId(),
+                        title: containerTitle || 'to do list',
+                        createdAt: generateTemporaryTime(),
+                        tasks: [],
+                    })
+                }
+
+                let targetContainer =
+                    (containerTitle &&
+                        containers.find(
+                            (container) =>
+                                container.title.toLowerCase() ===
+                                containerTitle.toLowerCase()
+                        )) ||
+                    containers[0]
+
+                if (!targetContainer && containers.length > 0) {
+                    targetContainer = containers[0]
+                }
+
+                targetContainer?.tasks.push({
+                    userId: 'something something',
+                    ...taskInputs,
+                })
+            },
+            prepare: (inputs: TaskForDatePayload) => {
+                const id = generateTemporaryId()
+                const createdAt = generateTemporaryTime()
+                return { payload: { ...inputs, id, createdAt } }
+            },
+        },
+        restoreTask: (
+            state,
+            action: PayloadAction<{
+                date: TasksDate
+                container: string
+                task: Task
+            }>
+        ) => {
+            const { date, container, task } = action.payload
+            const targetContainer = state.containers[date.year]?.[date.month]?.[
+                date.date
+            ]?.find((c) => c.id === container)
+
+            if (!targetContainer) return
+            const exists = targetContainer.tasks.some((t) => t.id === task.id)
+            if (!exists) {
+                targetContainer.tasks.push(task)
+            }
+        },
+        replaceTaskId: (
+            state,
+            action: PayloadAction<{
+                date: TasksDate
+                container: string
+                fromId: string
+                toId: string
+            }>
+        ) => {
+            const { date, container, fromId, toId } = action.payload
+            const targetContainer = state.containers[date.year]?.[date.month]?.[
+                date.date
+            ]?.find((c) => c.id === container)
+            if (!targetContainer) return
+            const targetTask = targetContainer.tasks.find(
+                (task) => task.id === fromId
+            )
+            if (targetTask) {
+                targetTask.id = toId
+            }
+        },
         deleteTask: (
             state,
             action: PayloadAction<{
@@ -359,14 +454,9 @@ const calendarSlice = createSlice({
             const targetContainer = state.containers[date.year][date.month][
                 date.date
             ].find((c) => c.id === containerId)
-            state.containers[date.year][date.month][date.date].map((c) =>
-                c.id === targetContainer?.id
-                    ? {
-                          ...c,
-                          title,
-                      }
-                    : c
-            )
+            if (targetContainer) {
+                targetContainer.title = title
+            }
         },
         reOrderContainers: (
             state,
@@ -381,8 +471,8 @@ const calendarSlice = createSlice({
                 state.containers[date.year][date.month][date.date]
             state.containers[date.year][date.month][date.date] = arrayMove(
                 containers,
-                newIndex,
-                oldIndex
+                oldIndex,
+                newIndex
             )
         },
     },
@@ -409,6 +499,9 @@ export const {
     markTask,
     createEmptyContainer,
     addTask,
+    addTaskToDate,
+    restoreTask,
+    replaceTaskId,
     deleteTask,
     editTask,
     addContainer,

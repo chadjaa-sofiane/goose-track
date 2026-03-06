@@ -1,14 +1,23 @@
 {
-    "name": "goose-track",
+    "name": "orbitflow",
     "module": "index.ts",
     "type": "module",
+    "packageManager": "bun@1.2.4",
     "scripts": {
         "prepare": "husky install",
-        "dev": "bun --cwd packages/client dev & bun --cwd packages/api dev"
+        "dev": "turbo run dev --parallel --ui=stream",
+        "build": "turbo run build",
+        "postbuild": "npm run seed:dummy-user",
+        "build:client": "npm run --workspace packages/client build",
+        "lint": "turbo run lint",
+        "test": "turbo run test",
+        "start": "bun run --cwd packages/api src/index.ts",
+        "seed:dummy-user": "bun run --cwd packages/api scripts/seedDummyUser.ts"
     },
     "devDependencies": {
         "@vitest/coverage-v8": "^0.34.6",
-        "bun-types": "latest"
+        "bun-types": "latest",
+        "turbo": "^2.5.8"
     },
     "peerDependencies": {
         "typescript": "^5.0.0"

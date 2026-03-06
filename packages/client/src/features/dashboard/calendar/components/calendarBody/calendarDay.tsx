@@ -12,6 +12,7 @@ import {
     setDate,
     updateContainerTitle,
 } from '@/redux/calendarSlice'
+import { isPersistedTaskId, updateTaskById } from '@/api/calendarApi'
 import PlusIcon from '@/assets/plus.svg?react'
 import { motion } from 'framer-motion'
 import dayjs, { Dayjs } from 'dayjs'
@@ -39,6 +40,7 @@ import {
     useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { useToast } from '@/components/toast/toastProvider'
 
 const DRAG_TYPES = {
     TASK: 'drag_task',
@@ -69,7 +71,7 @@ const WeekDaysField = () => {
     }
 
     return (
-        <div className="sticky grid grid-cols-7 bg-accents-6  rounded-lg border-2 border-[#42434b]">
+        <div className="sticky grid grid-cols-7 rounded-lg border border-accents-4 bg-accents-5/40">
             {getDaysOfWeek(year, month, date)?.map((weekDate, index) => (
                 <div
                     className={cn(
@@ -86,7 +88,7 @@ const WeekDaysField = () => {
                     key={index}
                     onPointerDown={() => setDateHandler(weekDate)}
                 >
-                    <span className="text-[#62636a] first-letter:text-base text-[0px] md:text-base text-center">
+                    <span className="text-[0px] text-text/60 first-letter:text-base md:text-base text-center">
                         {WEEK_DAYS[index]}
                     </span>
                     <span> {weekDate.date()} </span>
@@ -115,6 +117,7 @@ const TasksSpaceContainer = () => {
     )
 
     const dispatch = useAppDispatch()
+    const { pushToast } = useToast()
 
     const ref = useRef<HTMLDivElement>(null)
 
@@ -146,6 +149,41 @@ const TasksSpaceContainer = () => {
                     id,
                 })
             )
+            const targetContainerData = containers.find(
+                (container) => container.id === targetContainer
+            )
+            const task = containers
+                .flatMap((container) => container.tasks)
+                .find((currentTask) => currentTask.id === id)
+
+            if (task && isPersistedTaskId(task.id)) {
+                void (async () => {
+                    try {
+                        const result = await updateTaskById(task.id, {
+                            container: targetContainerData?.title || '',
+                        })
+                        if (!result.success) {
+                            dispatch(
+                                markTask({
+                                    container: sourceContainer,
+                                    date: tasksDate,
+                                    id,
+                                })
+                            )
+                            pushToast('Move failed. Task moved back.', 'error')
+                        }
+                    } catch {
+                        dispatch(
+                            markTask({
+                                container: sourceContainer,
+                                date: tasksDate,
+                                id,
+                            })
+                        )
+                        pushToast('Move failed. Task moved back.', 'error')
+                    }
+                })()
+            }
         }
     }
 
@@ -282,7 +320,7 @@ const TasksContainer = ({
             style={style}
             {...attributes}
             className={cn(
-                'w-[25em] shrink-0 flex flex-col gap-y-7 bg-accents-6 px-5 py-[1.125em] border border-[#42434b] rounded-lg',
+                'w-[25em] shrink-0 flex flex-col gap-y-7 rounded-lg border border-accents-4 bg-accents-5/40 px-5 py-[1.125em]',
                 {
                     'border border-accents-1': shouldMarkTask,
                     'bg-accents-1 bg-opacity-25 scale-[1.01] duration-200 transition-transform':
@@ -310,7 +348,7 @@ const TasksContainer = ({
                     date={tasksDate}
                     containerId={id}
                 />
-                <span className="border-2 border-white rounded-full p-0.5 grid place-items-center cursor-pointer">
+                <span className="grid cursor-pointer place-items-center rounded-full border border-text/35 p-0.5">
                     <PlusIcon onClick={handleNewContainer} />
                 </span>
             </div>
@@ -410,7 +448,7 @@ interface DraggableProps {
     container: string
     task: Task
     openEditTask: (task: Task) => void
-    openDeleteTask: (taskId: string) => void
+    openDeleteTask: (taskId: string, task?: Task) => void
 }
 const Draggable = ({
     id,
@@ -450,7 +488,7 @@ interface TaskProps {
     listeners?: SyntheticListenerMap | undefined
     attributes?: DraggableAttributes
     openEditTask?: (task: Task) => void
-    openDeleteTask?: (taskId: string) => void
+    openDeleteTask?: (taskId: string, task?: Task) => void
 }
 
 const Task = ({
@@ -462,8 +500,9 @@ const Task = ({
 }: TaskProps) => {
     return (
         <motion.div
-            // onHoverStart={{  }}
-            className="flex flex-col gap-y-8 p-3.5 text-text bg-bg border border-[#42434b] rounded-md"
+            whileHover={{ y: -2 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col gap-y-5 rounded-xl border border-accents-4 bg-bg/80 p-4 text-text shadow-[0_10px_20px_rgba(6,11,24,0.2)] transition-colors"
         >
             <div
                 {...listeners}
@@ -476,19 +515,25 @@ const Task = ({
                         listeners['onKeyDown'](e)
                     }
                 }}
-                className="flex items-center gap-3"
+                className="flex items-start gap-3"
             >
-                <span>
-                    <DraggableIcon className="fill-white" />
+                <span className="mt-1">
+                    <DraggableIcon className="fill-text/70" />
                 </span>
-                <p className="align-top"> {task.title} </p>
+                <div className="flex-1">
+                    <p className="line-clamp-2 text-sm font-semibold leading-5 md:text-base">
+                        {task.title}
+                    </p>
+                    <p className="mt-1 text-xs text-text/60">
+                        {task.start} - {task.end}
+                    </p>
+                </div>
             </div>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
                 <div className="flex gap-x-2">
-                    <div className="w-8 h-8 bg-slate-600 rounded-full"></div>
                     <div
                         className={cn(
-                            'px-3 py-1 text-white rounded-md first-letter:uppercase',
+                            'rounded-full px-3 py-1 text-xs font-semibold text-white first-letter:uppercase',
                             {
                                 'bg-priorities-low': task.priority === 'low',
                                 'bg-priorities-medium':
@@ -501,15 +546,15 @@ const Task = ({
                         {task.priority}{' '}
                     </div>
                 </div>
-                <div className="flex gap-x-2.5 cursor-pointer">
-                    <CircleArrowIcon className="hover:scale-125" />
+                <div className="flex cursor-pointer gap-x-2.5">
+                    <CircleArrowIcon className="transition-transform hover:scale-125" />
                     <PencilIcon
                         onClick={() => openEditTask?.(task)}
-                        className="hover:scale-125"
+                        className="transition-transform hover:scale-125"
                     />
                     <TrashIcon
-                        onClick={() => openDeleteTask?.(task.id)}
-                        className="hover:scale-125"
+                        onClick={() => openDeleteTask?.(task.id, task)}
+                        className="transition-transform hover:scale-125"
                     />
                 </div>
             </div>
