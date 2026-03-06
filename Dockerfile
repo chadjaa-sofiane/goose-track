@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN bun install --frozen-lockfile
+RUN bun install
 RUN bun run --cwd packages/client build
 
 ENV NODE_ENV=production
